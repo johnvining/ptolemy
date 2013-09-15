@@ -17,14 +17,16 @@ def index(request):
 	html = ''; result = ''
 
 	if (request.get('query')):
-	
 		query = request.get('query')
 		parts = re.split('([\*\+\-\/\:])', query)	
 
 		# Print Query
 		html += '<div class="controls">Query: %s</div>' % query
-		# html += printList(parts)
+		
 		while True:
+			if (len(parts) < 4):
+				result = evaluate(parts[0], parts[2], parts[1])
+				break
 			c = 0; triplets = []; length = len(parts) - 2	
 			
 			while (c < length):
@@ -39,10 +41,6 @@ def index(request):
 			parts[d] = subResult
 			html += summarizeRow(parts)
 
-			if (len(parts) < 4):
-				result = evaluate(parts[0], parts[2], parts[1])
-				break
-
 		# # Print Result
 		html += '<div class="controls">Result: %s<br/><br/>' % sexagesimal(result)
 		html += '<form><input type="text" name="query" value=%s></form>' % (sexagesimal(result))
@@ -50,13 +48,9 @@ def index(request):
 	else:
 		html += '<div class="controls">Query:<br/><form><input type="text" name="query"></form></div>'
 
-	
-
 	# Put page together and send as response
-	html = createPage(html, "Learning Python Blog Engine Home", "Ptolemy: Sexagesimal Calculator")
+	html = createPage(html, "Ptolemy", "Ptolemy: Sexagesimal Calculator")
 	return pesto.Response([html])
-
-
 
 sessioning = pesto.session_middleware(pesto.session.memorysessionmanager.MemorySessionManager())
 application = sessioning(dispatcher)
@@ -110,7 +104,6 @@ def whatIsThis(s):
 		return "dunno"
 
 def evaluate(x, y, operator):
-	print "xyop", x,y,operator
 	if (operator == "*"):
 		return decimal(x) * decimal(y)
 	elif (operator == "+"):
@@ -120,7 +113,7 @@ def evaluate(x, y, operator):
 	elif (operator == '-'):
 		return decimal(x) - decimal(y)
 	else:
-		return 1000
+		return 1000 #For debugging purposes
 
 def nextTripletToEvaluate(triplets):
 	order = ['*', ':', '+', '-']
@@ -137,9 +130,6 @@ def summarizeRow(parts):
 	html += '<div class="step">'
 	for x in parts:
 		html += sexagesimal(x)
-	# html += '<br/>'
-	# for x in parts:
-	# 	html += str(x)
 	html += '</div>'
 	return html
 
