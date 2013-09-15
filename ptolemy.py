@@ -18,10 +18,10 @@ def index(request):
 
 	if (request.get('query')):
 		query = request.get('query')
-		parts = re.split('([\*\+\-\/\:])', query)	
+		parts = re.split('([\*\+\-\/\:\^])', query)	
 
 		# Print Query
-		html += '<div class="controls">Query: %s</div>' % query
+		html += '<div class="controls"><small>QUERY</small><br/>%s</div>' % formatParts(parts)
 		
 		while True:
 			if (len(parts) < 4):
@@ -42,8 +42,8 @@ def index(request):
 			html += summarizeRow(parts)
 
 		# # Print Result
-		html += '<div class="controls">Result: %s<br/><br/>' % sexagesimal(result)
-		html += '<form><input type="text" name="query" value=%s></form>' % (sexagesimal(result))
+		html += '<div class="controls"><small>RESULT</small><br/><big>%s</big><br/><br/>' % sexagesimal(result)
+		html += '<small>NEW QUERY</small><br/><form><input type="text" name="query" value=%s></form>' % (sexagesimal(result))
 		html += '</div>'
 	else:
 		html += '<div class="controls">Query:<br/><form><input type="text" name="query"></form></div>'
@@ -71,7 +71,7 @@ def decimal(s):
 	else:
 		return float(s)
 
-def sexagesimal(n):
+def sexagesimal(n, places=2):
 	# If sexagesimal, return n
 	# If not, return a sexigesimal representation of n
 	# If not a number, return n
@@ -82,7 +82,6 @@ def sexagesimal(n):
 		s = ''
 		i, d = divmod(n, 1)
 		s += str(int(i)) + ";"
-		places = 2
 		while (places > 0):
 			i, d = divmod(d * 60, 1)
 			s += str(int(i))
@@ -93,16 +92,6 @@ def sexagesimal(n):
 	else:
 		return n
 
-def whatIsThis(s):
-	if ";" in s:
-		return "number"
-	elif "*" in s:
-		return "operator"
-	elif "+" in s or "-" in s or "/" in s:
-		return "operator"
-	else:
-		return "dunno"
-
 def evaluate(x, y, operator):
 	if (operator == "*"):
 		return decimal(x) * decimal(y)
@@ -112,11 +101,13 @@ def evaluate(x, y, operator):
 		return decimal(x) / decimal(y)
 	elif (operator == '-'):
 		return decimal(x) - decimal(y)
+	elif (operator == '^'):
+		return decimal(x) ** decimal(y)
 	else:
 		return 1000 #For debugging purposes
 
 def nextTripletToEvaluate(triplets):
-	order = ['*', ':', '+', '-']
+	order = ['^', '*', ':', '+', '-']
 	for operator in order:
 		c = 0
 		for x in triplets:		
@@ -128,9 +119,30 @@ def nextTripletToEvaluate(triplets):
 def summarizeRow(parts):
 	html = ''
 	html += '<div class="step">'
-	for x in parts:
-		html += sexagesimal(x)
+	html += formatParts(parts)
 	html += '</div>'
+	return html
+
+def formatParts(parts):
+	html = ''; endSuper = False
+	for x in parts:
+		if (x == '^'):
+			html += '<sup>'
+			endSuper = True
+		elif (endSuper):
+			html += sexagesimal(x) + '</sup>'
+			endSuper = False
+		elif (x == '+'):
+			html += ' <b>+</b> '
+		elif (x == '*'):
+			html += ' &times; '
+		elif (x == ':'):
+			html += ' <b>:</b> '
+		elif (x == '-'):
+			html += ' <b>&ndash;</b> '
+		else:
+			html += sexagesimal(x)
+
 	return html
 
 def createHTMLHeader(title):
@@ -145,9 +157,7 @@ def createHTMLHeader(title):
 	return html
 
 def createHTMLFooter():
-	html = ''
-	html += '</body></html>'
-	return html
+	return '</body></html>'
 
 def createPage(bodyHTML, title, subhead):
 	html = ''
@@ -157,11 +167,8 @@ def createPage(bodyHTML, title, subhead):
 	html += createHTMLFooter()
 	return html
 
-def createAlert(type, text):
-	html = ''
-	html += '<div class="%s">' % (type)
-	html += text
-	html += '</div>'
+def createAlert(kind, text):
+	html = '<div class="%s">%s</div>' % (kind, text)
 	return html
 
 def printList(listy):
