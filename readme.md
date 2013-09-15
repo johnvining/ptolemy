@@ -35,6 +35,7 @@ Ptolemy requires [Pesto](http://www.ollycope.com/software/pesto/).
 ##### September 15, 2013
 
 * Added exponents. Use `^`.
+* Added evaluation of a single number. Can now be used as a simple decimal to sexagesimal converter.
 * Added an optional argument to `sexagesimal()` for number of places. Defaults to 2.
 * Cleaned up display of expressions.
 * Fixed Bug: Calculations with just two numbers give an error. Oops.

@@ -21,10 +21,16 @@ def index(request):
 		parts = re.split('([\*\+\-\/\:\^])', query)	
 
 		# Print Query
-		html += '<div class="controls"><small>QUERY</small><br/>%s</div>' % formatParts(parts)
+		if (len(parts) == 1):
+			html += '<div class="controls"><small>QUERY</small><br/>%s</div>' % query
+		else:
+			html += '<div class="controls"><small>QUERY</small><br/>%s</div>' % formatParts(parts)
 		
 		while True:
-			if (len(parts) < 4):
+			if (len(parts) == 1):
+				result = sexagesimal(parts[0])
+				break
+			elif (len(parts) < 4):
 				result = evaluate(parts[0], parts[2], parts[1])
 				break
 			c = 0; triplets = []; length = len(parts) - 2	
@@ -80,7 +86,7 @@ def sexagesimal(n, places=2):
 		return n
 	elif ('.' in str(n)):
 		s = ''
-		i, d = divmod(n, 1)
+		i, d = divmod(float(n), 1)
 		s += str(int(i)) + ";"
 		while (places > 0):
 			i, d = divmod(d * 60, 1)
