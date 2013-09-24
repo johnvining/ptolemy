@@ -17,11 +17,12 @@ The calculator takes a query like `3;0 + 2;30 * 4;45,45` and returns a value in 
 
 Here is a very preliminary todo list:
 
-* Add error-handling and some input verification.
-* Rewrite main mathematical functions without reliance on decimal calculatinos.
+* Add input verification.
+* Rewrite main mathematical functions without reliance on decimal calculations.
 * Add support for parentheses
 * Add support for trigonometry, both calculated and using Ptolemy's values from the Chord Table
-* Add an option to pare numbers down to a certain number of places at each step to simulate calculation by hand
+* Add an option to pare numbers down to a certain number of places at each step to simulate calculation by hand.
+* Feed templates a list of steps to render instead of rendering those in `ptolemy.py`.
 
 ### Requirements
 
@@ -29,7 +30,14 @@ Ptolemy requires [Flask](http://flask.pocoo.org).
 
 ### Recent Updates
 
-##### 2013-09-23 
+##### 2013-09-23b
+
+* Added basic error handling.
+* Got more HTML out of `ptolemy.py`.
+* Small changes to CSS and HTML.
+
+
+##### 2013-09-23a
 
 * Switched from `Pesto` to `Flask` to run on Heroku.
 * Switched some variables to snake_case. Will be doing more of this where needed.

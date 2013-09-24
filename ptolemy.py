@@ -5,6 +5,7 @@ from flask import Flask, url_for, render_template, request, Markup
 app = Flask(__name__)
 app.debug = True
 
+@app.route('/query/', methods=['GET'])
 @app.route('/')
 def ptolemy():
 	return render_template('pt.html', title="Ptolemy", instructions=True)
@@ -17,34 +18,37 @@ def evaluate_query():
 	if request.method == 'POST':
 		query = request.form['query']
 		parts = re.split('([\*\+\-\/\:\^])', query)	
-
-	if (len(parts) == 1):
-		html += '<div class="controls"><small>QUERY</small><br/>%s</div>' % query
-	else:
-		html += '<div class="controls"><small>QUERY</small><br/>%s</div>' % formatParts(parts)
+		formatted_query = formatParts(parts)
 
 	while True:
-		if (len(parts) == 1):
-			result = sexagesimal(parts[0])
+		try:
+			if (len(parts) == 1):
+				result = sexagesimal(parts[0])
+				break
+			elif (len(parts) < 4):
+				result = evaluate(parts[0], parts[2], parts[1])
+				break
+			c = 0; triplets = []; length = len(parts) - 2	
+			
+			while (c < length):
+				triplets.extend([parts[c:c+3]])
+				c = c + 1
+			d = nextTripletToEvaluate(triplets)
+
+			subResult = evaluate(parts[d], parts[d+2], parts[d+1])
+
+			parts.pop(d)
+			parts.pop(d+1)
+			parts[d] = subResult
+			html += summarizeRow(parts)
+		except:
+			error = "There was a problem with the query: " + formatted_query
 			break
-		elif (len(parts) < 4):
-			result = evaluate(parts[0], parts[2], parts[1])
-			break
-		c = 0; triplets = []; length = len(parts) - 2	
-		
-		while (c < length):
-			triplets.extend([parts[c:c+3]])
-			c = c + 1
-		d = nextTripletToEvaluate(triplets)
 
-		subResult = evaluate(parts[d], parts[d+2], parts[d+1])
-
-		parts.pop(d)
-		parts.pop(d+1)
-		parts[d] = subResult
-		html += summarizeRow(parts)
-
-	return render_template('pt.html', export=Markup(html), result=Markup(sexagesimal(result)), error=error)
+	if (error==''): 
+		return render_template('pt.html', export=Markup(html), result=Markup(sexagesimal(result)), query=Markup(formatted_query))
+	else:
+		return render_template('pt.html', result="NO RESULT", error=Markup(error))
 
 def decimal(s):
 	if (';' in str(s)):
@@ -144,42 +148,3 @@ def printList(listy):
 		html += '<li>%s</li>' % x
 	html += '</ul>'
 	return html
-
-# class Number:
-# 	def __init__(self, s): 
-# 		if (';' in str(s)):
-# 			self.base = 60
-# 			whole_and_frac = string.split(s, ";")
-# 			self.whole = int(whole_and_frac[0])
-# 			if (',' in str(whole_and_frac[1])):
-# 				fracs = string.split(whole_and_frac[1], ",")
-# 				y = 1
-# 				self.parts = []
-# 				for x in fracs:
-# 					self.parts.extend([int(x)])
-# 			else:
-# 				self.parts = [int(whole_and_frac[1])]
-# 		elif ('.' in str(s)):
-# 			self.base = 10
-# 			self.decfloat = float(s)
-# 		else:
-# 			self.whole = int(s)
-
-
-# 	def print_number(self, places=4):
-# 		if (self.base == 60):
-# 			s  = str(self.whole) + ";"
-# 			places = min(places, len(self.parts))
-# 			for x in self.parts:
-# 				if (places > 1):
-# 					s += str(x) + ","
-# 				elif (places == 1):
-# 					s += str(x)
-# 				places -= 1
-# 		elif (self.base == 10):
-# 			s = str(self.decfloat)
-
-# 		return s
-
-# 	# TODO: Switch to: Print natural (b60 or b10 based on number), and specific
-# 	# methods to force the conversion.

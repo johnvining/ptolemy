@@ -6,8 +6,8 @@
 	div.page_title
 		{font-size: 30; color: white; text-align: left; background: #3385FF; padding: 12px; margin: 12; width: 500px}
 	div.footer
-		{font-size: 12; color: white; text-align: left; background: #3385FF; padding: 12px; margin: 12; width: 500px}
-	div.footer a {color: white; text-decoration: none; font-weight: bold;}
+		{font-size: 12; color: black; text-align: left; padding: 12px; margin: 12; width: 500px}
+	div.footer a {color: black; text-decoration: none;}
 	div.footer a:hover {text-decoration: underline;}
 
 	input
@@ -21,6 +21,8 @@
 		{color: white; font-size: 18; text-align: left; background: #FF9900; padding: 12px; margin:12px; width: 500px}
 	div.error
 		{color: white; font-size: 18; text-align: left; background: #D14719; padding: 12px; margin:12px; width: 500px}
+	div.error a {color: white; text-decoration: none; font-weight: bold;}
+	div.error a:hover {text-decoration: underline;}
 
 	span.section_header 
 		{font-size: 13; text-transform: uppercase;}
@@ -35,12 +37,19 @@
 	<div class="warning"><span class="section_header">Warning</span><br/>{{ warning}}</div>
 {% endif %}
 {% if error %}
-	<div class="error"><span class="section_header">Error</span><br/>{{ error }}</div>
+	<div class="error"><span class="section_header">Error</span><br/>{{ error }}<br/></div>
 {% endif %}
 {% if instructions %}
 	<div class="controls">
 		<span class="section_header">Instructions</span><br/>
 		<small>Please enter a query below. Valid input includes sexagesimal numbers (3;30,5), decimal numbers, and the five basic operators: ^, +, -, *, and : for division.</small>
+	</div>
+{% endif %}
+
+{% if query %}
+	<div class="controls">
+		<span class="section_header">Query</span><br/>
+		{{ query }}
 	</div>
 {% endif %}
 
@@ -63,5 +72,5 @@
 	</div>
 {% endif %}
 
-<div class="footer">Please find the code for this project on <a href="https://github.com/senecando/ptolemy">Git Hub</a> or <a href="mailto:johnvining@gmail.com">Email me</a>.</div>
+<div class="footer"><center>by John Vining &middot; <a href="https://github.com/senecando/ptolemy">Git Hub</a> &middot; <a href="mailto:johnvining@gmail.com">Contact</a></center></div>
 </body></html>
