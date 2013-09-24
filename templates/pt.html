@@ -1,32 +1,9 @@
 <html>
 <header>
 	<title>{{title}}</title>
-	<style type="text/css">
-	
-	div.page_title
-		{font-size: 30; color: white; text-align: left; background: #3385FF; padding: 12px; margin: 12; width: 500px}
-	div.footer
-		{font-size: 12; color: black; text-align: left; padding: 12px; margin: 12; width: 500px}
-	div.footer a {color: black; text-decoration: none;}
-	div.footer a:hover {text-decoration: underline;}
-
-	input
-		{font-size:18px; width: 100%; height: 30px; margin: 0px; padding: 0px;}
-
-	div.step
-		{font-size: 18; text-align: left; background: #D9D9D9; padding: 12px; margin: 12; width: 500px}
-	div.controls
-		{color: white; font-size: 18; text-align: left; background: #555D73; padding: 12px; margin:12px; width: 500px}
-	div.warning
-		{color: white; font-size: 18; text-align: left; background: #FF9900; padding: 12px; margin:12px; width: 500px}
-	div.error
-		{color: white; font-size: 18; text-align: left; background: #D14719; padding: 12px; margin:12px; width: 500px}
-	div.error a {color: white; text-decoration: none; font-weight: bold;}
-	div.error a:hover {text-decoration: underline;}
-
-	span.section_header 
-		{font-size: 13; text-transform: uppercase;}
-	</style>
+	<link rel="stylesheet"
+      type="text/css"
+      href="/static/style.css"/>
 </header>
 <body>
 
@@ -62,7 +39,7 @@
 <!-- STEPS -->
 {% if steps %}
 	{% for step in steps%}
-	{{ step }}
+	<div class="step">{{ step }}</div>
 	{% endfor %}
 {% endif %}
 

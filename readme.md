@@ -17,12 +17,12 @@ The calculator takes a query like `3;0 + 2;30 * 4;45,45` and returns a value in 
 
 Here is a very preliminary todo list:
 
-* Sanitize input.
 * Rewrite main mathematical functions without reliance on decimal calculations.
 * Add support for parentheses
 * Add support for trigonometry, both calculated and using Ptolemy's values from the Chord Table
 * Add an option to pare numbers down to a certain number of places at each step to simulate calculation by hand.
 * Feed templates a list of steps to render instead of rendering those in `ptolemy.py`.
+* Allow negative number as first number.
 
 ### Requirements
 
@@ -30,36 +30,21 @@ Ptolemy requires [Flask](http://flask.pocoo.org).
 
 ### Recent Updates
 
-##### 2013-09-24 
+##### 2013-09-24b
+
+* Sanitized input by removing anything that is not alphanumeric or an operator.
+* Moved the CSS to its own file: `\static\style.css`
+* Moved old changes to new file: `changes.md`
+
+##### [2013-09-24a](https://github.com/senecando/ptolemy/commit/e6fc3e398d2dbd70c3a93e0c7cb309f91d9cfb48)
 
 * In the last update I removed the part that showed results. It's back.
 * Error handling got a tiny bit better.
 * Added a warning about iffy accuracy for now.
 * Now feeding steps through as a list of marked-up HTML.
 
-##### 2013-09-23b
+##### [2013-09-23b](https://github.com/senecando/ptolemy/commit/95cb5b0f32bc599f137258a7f3d73c7e8a103f4c)
 
 * Added basic error handling.
 * Got more HTML out of `ptolemy.py`.
 * Small changes to CSS and HTML.
-
-
-##### 2013-09-23a
-
-* Switched from `Pesto` to `Flask` to run on Heroku.
-* Switched some variables to snake_case. Will be doing more of this where needed.
-* Started using templates for html generation.
-* Started work on moving code into objects.
-* Changed the CSS and HTML a bit.
-* Added instructions to the home page.
-* Created a way to display warnings and errors to the user.
-
-
-##### 2013-09-15
-
-* Added exponents. Use `^`.
-* Added evaluation of a single number. Can now be used as a simple decimal to sexagesimal converter.
-* Added an optional argument to `sexagesimal()` for number of places. Defaults to 2.
-* Cleaned up display of expressions.
-* Fixed Bug: Calculations with just two numbers give an error. Oops.
-* Initial commit.

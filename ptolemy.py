@@ -5,6 +5,13 @@ from flask import Flask, url_for, render_template, request, Markup
 app = Flask(__name__)
 app.debug = True
 
+warning = '''
+			<small>At this point, all calculations are conducted in decimal and
+			converted to display in sexagesimal. This can cause bad 
+			errors. For example, try: 1;1+1;0. This will be changed
+			shortly.</small>
+		'''
+
 @app.route('/query/', methods=['GET'])
 @app.route('/')
 def ptolemy():
@@ -16,8 +23,12 @@ def evaluate_query():
 
 	if request.method == 'POST':
 		query = request.form['query']
-		parts = re.split('([\*\+\-\/\:\^])', query)	
+		query = re.sub(r'\/','\:', query)
+		query = re.sub(r'[^\w\*\+\-\/\:\^\;\,\.]', '', query)
+		parts = re.split('([\*\+\-\:\^])', query)	
 		formatted_query = formatParts(parts)
+		if (parts == ['']):
+			error = "That query is not a query at all!"
 
 	while True:
 		try:
@@ -39,13 +50,13 @@ def evaluate_query():
 			parts.pop(d)
 			parts.pop(d+1)
 			parts[d] = subResult
-			steps.append(Markup(summarizeRow(parts)))
+			steps.append(Markup(formatParts(parts)))
 		except Exception as e:
 			error = "There was a problem with the query: " + formatted_query + '<br/><small><small>Python sez: ' + str(e) + '</small></small>'
 			break
 
 	if (error==''): 
-		return render_template('pt.html', steps=steps, result=Markup(sexagesimal(result)), query=Markup(formatted_query), warning="At the moment, all calculations are conducted in decimal and display in sexgesimal.")
+		return render_template('pt.html', steps=steps, result=Markup(sexagesimal(result)), query=Markup(formatted_query), warning=Markup(warning))
 	else:
 		return render_template('pt.html', result=result, error=Markup(error))
 
@@ -108,13 +119,6 @@ def next_to_evaluate(triplets):
 				return c
 			c += 1
 	return 0
-
-def summarizeRow(parts):
-	html = ''
-	html += '<div class="step">'
-	html += formatParts(parts)
-	html += '</div>'
-	return html
 
 def formatParts(parts):
 	html = ''; endSuper = False
