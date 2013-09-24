@@ -12,8 +12,7 @@ def ptolemy():
 
 @app.route('/query/', methods=['POST'])
 def evaluate_query():
-	html = ''
-	error = ''
+	error = ''; steps = []; result = ''
 
 	if request.method == 'POST':
 		query = request.form['query']
@@ -33,35 +32,35 @@ def evaluate_query():
 			while (c < length):
 				triplets.extend([parts[c:c+3]])
 				c = c + 1
-			d = nextTripletToEvaluate(triplets)
+			d = next_to_evaluate(triplets)
 
 			subResult = evaluate(parts[d], parts[d+2], parts[d+1])
 
 			parts.pop(d)
 			parts.pop(d+1)
 			parts[d] = subResult
-			html += summarizeRow(parts)
-		except:
-			error = "There was a problem with the query: " + formatted_query
+			steps.append(Markup(summarizeRow(parts)))
+		except Exception as e:
+			error = "There was a problem with the query: " + formatted_query + '<br/><small><small>Python sez: ' + str(e) + '</small></small>'
 			break
 
 	if (error==''): 
-		return render_template('pt.html', export=Markup(html), result=Markup(sexagesimal(result)), query=Markup(formatted_query))
+		return render_template('pt.html', steps=steps, result=Markup(sexagesimal(result)), query=Markup(formatted_query), warning="At the moment, all calculations are conducted in decimal and display in sexgesimal.")
 	else:
-		return render_template('pt.html', result="NO RESULT", error=Markup(error))
+		return render_template('pt.html', result=result, error=Markup(error))
 
 def decimal(s):
 	if (';' in str(s)):
 		whole_and_frac = string.split(s, ";")
-		numInDec = float(whole_and_frac[0])
+		number_as_decimal = float(whole_and_frac[0])
 		fracs = string.split(whole_and_frac[1], ",")
 		y = 1
 		for x in fracs:
 			x = float(x)
 			denom = pow(60, y)
-			numInDec += x/denom
+			number_as_decimal += x/denom
 			y += 1
-		return numInDec
+		return number_as_decimal
 	else:
 		return float(s)
 
@@ -100,7 +99,7 @@ def evaluate(x, y, operator):
 	else:
 		return 1000 #For debugging purposes
 
-def nextTripletToEvaluate(triplets):
+def next_to_evaluate(triplets):
 	order = ['^', '*', ':', '+', '-']
 	for operator in order:
 		c = 0

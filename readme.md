@@ -17,7 +17,7 @@ The calculator takes a query like `3;0 + 2;30 * 4;45,45` and returns a value in 
 
 Here is a very preliminary todo list:
 
-* Add input verification.
+* Sanitize input.
 * Rewrite main mathematical functions without reliance on decimal calculations.
 * Add support for parentheses
 * Add support for trigonometry, both calculated and using Ptolemy's values from the Chord Table
@@ -29,6 +29,13 @@ Here is a very preliminary todo list:
 Ptolemy requires [Flask](http://flask.pocoo.org).
 
 ### Recent Updates
+
+##### 2013-09-24 
+
+* In the last update I removed the part that showed results. It's back.
+* Error handling got a tiny bit better.
+* Added a warning about iffy accuracy for now.
+* Now feeding steps through as a list of marked-up HTML.
 
 ##### 2013-09-23b
 

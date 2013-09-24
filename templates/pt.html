@@ -33,12 +33,12 @@
 <div class="page_title"><br><em>Ptolemy</em><br/>
 <small><small>Sexagesimal Calculator</small></small></div>
 
-{% if warning %}
-	<div class="warning"><span class="section_header">Warning</span><br/>{{ warning}}</div>
-{% endif %}
+<!-- ERROR -->
 {% if error %}
 	<div class="error"><span class="section_header">Error</span><br/>{{ error }}<br/></div>
 {% endif %}
+
+<!-- INSTRUCTIONS -->
 {% if instructions %}
 	<div class="controls">
 		<span class="section_header">Instructions</span><br/>
@@ -46,6 +46,12 @@
 	</div>
 {% endif %}
 
+<!-- WARNING -->
+{% if warning %}
+	<div class="warning"><span class="section_header">Warning</span><br/>{{ warning}}</div>
+{% endif %}
+
+<!-- QUERY -->
 {% if query %}
 	<div class="controls">
 		<span class="section_header">Query</span><br/>
@@ -53,8 +59,15 @@
 	</div>
 {% endif %}
 
-{% if export %}
-	{{ export }}
+<!-- STEPS -->
+{% if steps %}
+	{% for step in steps%}
+	{{ step }}
+	{% endfor %}
+{% endif %}
+
+<!-- RESULT -->
+{% if result %}
 	<div class="controls">
 		<span class="section_header">Result</span><br/>
 		{{ result }}
@@ -71,6 +84,7 @@
 		<input type="text" name="query"></form>
 	</div>
 {% endif %}
+
 
 <div class="footer"><center>by John Vining &middot; <a href="https://github.com/senecando/ptolemy">Git Hub</a> &middot; <a href="mailto:johnvining@gmail.com">Contact</a></center></div>
 </body></html>
