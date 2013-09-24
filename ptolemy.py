@@ -1,72 +1,56 @@
-#! /usr/bin/python
-
-import sys
-import os
-sys.path.append('/Library/WebServer/CGI-Executables/ptolemy')
-import string
-import re
-import math
-import pesto
-import pesto.session.memorysessionmanager
+import os, sys, string, re
+from flask import Flask, url_for, render_template, request, Markup
 
 
-dispatcher = pesto.dispatcher_app()
-@dispatcher.match('/', 'GET')
-def index(request):
-	# M A I N   P A G E :   G E T 
-	html = ''; result = ''
+app = Flask(__name__)
+app.debug = True
 
-	if (request.get('query')):
-		query = request.get('query')
+@app.route('/')
+def ptolemy():
+	return render_template('pt.html', title="Ptolemy", instructions=True)
+
+@app.route('/query/', methods=['POST'])
+def evaluate_query():
+	html = ''
+	error = ''
+
+	if request.method == 'POST':
+		query = request.form['query']
 		parts = re.split('([\*\+\-\/\:\^])', query)	
 
-		# Print Query
-		if (len(parts) == 1):
-			html += '<div class="controls"><small>QUERY</small><br/>%s</div>' % query
-		else:
-			html += '<div class="controls"><small>QUERY</small><br/>%s</div>' % formatParts(parts)
-		
-		while True:
-			if (len(parts) == 1):
-				result = sexagesimal(parts[0])
-				break
-			elif (len(parts) < 4):
-				result = evaluate(parts[0], parts[2], parts[1])
-				break
-			c = 0; triplets = []; length = len(parts) - 2	
-			
-			while (c < length):
-				triplets.extend([parts[c:c+3]])
-				c = c + 1
-			d = nextTripletToEvaluate(triplets)
-
-			subResult = evaluate(parts[d], parts[d+2], parts[d+1])
-
-			parts.pop(d)
-			parts.pop(d+1)
-			parts[d] = subResult
-			html += summarizeRow(parts)
-
-		# # Print Result
-		html += '<div class="controls"><small>RESULT</small><br/><big>%s</big><br/><br/>' % sexagesimal(result)
-		html += '<small>NEW QUERY</small><br/><form><input type="text" name="query" value=%s></form>' % (sexagesimal(result))
-		html += '</div>'
+	if (len(parts) == 1):
+		html += '<div class="controls"><small>QUERY</small><br/>%s</div>' % query
 	else:
-		html += '<div class="controls">Query:<br/><form><input type="text" name="query"></form></div>'
+		html += '<div class="controls"><small>QUERY</small><br/>%s</div>' % formatParts(parts)
 
-	# Put page together and send as response
-	html = createPage(html, "Ptolemy", "Ptolemy: Sexagesimal Calculator")
-	return pesto.Response([html])
+	while True:
+		if (len(parts) == 1):
+			result = sexagesimal(parts[0])
+			break
+		elif (len(parts) < 4):
+			result = evaluate(parts[0], parts[2], parts[1])
+			break
+		c = 0; triplets = []; length = len(parts) - 2	
+		
+		while (c < length):
+			triplets.extend([parts[c:c+3]])
+			c = c + 1
+		d = nextTripletToEvaluate(triplets)
 
-sessioning = pesto.session_middleware(pesto.session.memorysessionmanager.MemorySessionManager())
-application = sessioning(dispatcher)
+		subResult = evaluate(parts[d], parts[d+2], parts[d+1])
 
+		parts.pop(d)
+		parts.pop(d+1)
+		parts[d] = subResult
+		html += summarizeRow(parts)
+
+	return render_template('pt.html', export=Markup(html), result=Markup(sexagesimal(result)), error=error)
 
 def decimal(s):
 	if (';' in str(s)):
-		wholeFrac = string.split(s, ";")
-		numInDec = float(wholeFrac[0])
-		fracs = string.split(wholeFrac[1], ",")
+		whole_and_frac = string.split(s, ";")
+		numInDec = float(whole_and_frac[0])
+		fracs = string.split(whole_and_frac[1], ",")
 		y = 1
 		for x in fracs:
 			x = float(x)
@@ -148,29 +132,6 @@ def formatParts(parts):
 			html += ' <b>&ndash;</b> '
 		else:
 			html += sexagesimal(x)
-
-	return html
-
-def createHTMLHeader(title):
-	html = ''
-	html += "<html><header><title>%s</title>" % (title)
-	html += '<style type="text/css">'
-	html += 'input {font-size:18px; width: 100%; height: 30px}'
-	html += 'div.pageTitle{font-size: 30; color: white; text-align: left; background: #6685E0; padding: 12px; margin: 12; width: 500px}'
-	html += 'div.step {font-size: 18; text-align: left; background: #D9D9D9; padding: 12px; margin: 12; width: 500px}'
-	html += 'div.controls {color: white; font-size: 18; text-align: left; background: #555D73; padding: 12px; margin:12px; width: 500px}</style>'		
-	html += "</header><body>"
-	return html
-
-def createHTMLFooter():
-	return '</body></html>'
-
-def createPage(bodyHTML, title, subhead):
-	html = ''
-	html += createHTMLHeader(title)
-	html += '<div class="pageTitle"><em></em></br><small><small>%s</small></small></div>' % subhead
-	html += bodyHTML
-	html += createHTMLFooter()
 	return html
 
 def createAlert(kind, text):
@@ -183,3 +144,42 @@ def printList(listy):
 		html += '<li>%s</li>' % x
 	html += '</ul>'
 	return html
+
+# class Number:
+# 	def __init__(self, s): 
+# 		if (';' in str(s)):
+# 			self.base = 60
+# 			whole_and_frac = string.split(s, ";")
+# 			self.whole = int(whole_and_frac[0])
+# 			if (',' in str(whole_and_frac[1])):
+# 				fracs = string.split(whole_and_frac[1], ",")
+# 				y = 1
+# 				self.parts = []
+# 				for x in fracs:
+# 					self.parts.extend([int(x)])
+# 			else:
+# 				self.parts = [int(whole_and_frac[1])]
+# 		elif ('.' in str(s)):
+# 			self.base = 10
+# 			self.decfloat = float(s)
+# 		else:
+# 			self.whole = int(s)
+
+
+# 	def print_number(self, places=4):
+# 		if (self.base == 60):
+# 			s  = str(self.whole) + ";"
+# 			places = min(places, len(self.parts))
+# 			for x in self.parts:
+# 				if (places > 1):
+# 					s += str(x) + ","
+# 				elif (places == 1):
+# 					s += str(x)
+# 				places -= 1
+# 		elif (self.base == 10):
+# 			s = str(self.decfloat)
+
+# 		return s
+
+# 	# TODO: Switch to: Print natural (b60 or b10 based on number), and specific
+# 	# methods to force the conversion.
