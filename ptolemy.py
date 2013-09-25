@@ -1,6 +1,6 @@
 import os, sys, string, re
 from flask import Flask, url_for, render_template, request, Markup
-
+import Sexagesimal
 
 app = Flask(__name__)
 app.debug = True
@@ -96,19 +96,7 @@ def sexagesimal(n, places=2):
 	else:
 		return n
 
-def evaluate(x, y, operator):
-	if (operator == "*"):
-		return decimal(x) * decimal(y)
-	elif (operator == "+"):
-		return decimal(x) + decimal(y)
-	elif (operator == ':'):
-		return decimal(x) / decimal(y)
-	elif (operator == '-'):
-		return decimal(x) - decimal(y)
-	elif (operator == '^'):
-		return decimal(x) ** decimal(y)
-	else:
-		return 1000 #For debugging purposes
+
 
 def next_to_evaluate(triplets):
 	order = ['^', '*', ':', '+', '-']
