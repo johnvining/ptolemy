@@ -10,7 +10,7 @@ warning = '''
 			converted to display in sexagesimal. This can cause bad 
 			errors. For example, try: 1;1+1;0. This will be changed
 			shortly.</small>
-		'''
+		  '''
 
 @app.route('/query/', methods=['GET'])
 @app.route('/')

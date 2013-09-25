@@ -11,7 +11,7 @@ As written, it converts sexagesimal numbers to decimal, performs the calculation
 
 The calculator takes a query like `3;0 + 2;30 * 4;45,45` and returns a value in sexagesimal. Order of operations is PEMDAS, though there is no support yet for parentheses. Decimal numbers and mixed decimal-sexagesimal expressions are also supported, e.g. `1;30 * 1.5`. An example:
 
-![](imgs/example.png)
+![](doc/example.png)
 
 ### Todo and bugs
 
@@ -23,12 +23,17 @@ Here is a very preliminary todo list:
 * Add an option to pare numbers down to a certain number of places at each step to simulate calculation by hand.
 * Feed templates a list of steps to render instead of rendering those in `ptolemy.py`.
 * Allow negative number as first number.
+* Add more helpful error messages.
 
 ### Requirements
 
 Ptolemy requires [Flask](http://flask.pocoo.org).
 
 ### Recent Updates
+
+##### 2013-09-24c
+
+* Wrote a sexagesimal addition function.
 
 ##### 2013-09-24b
 
