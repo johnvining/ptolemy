@@ -1,11 +1,34 @@
 import string, math
 
+# TODO: Move this somewhere better:
+max_places = 6
+
+def is_intable(s):
+		try:
+			int(s)
+			return True
+		except:
+			return False
+
 class Sexagesimal:
+
+# 	A number is made of:
+# 	* negative: True or False
+# 	* whole: the whole-number portion of the number, stored as integer
+# 	* parts: the parts of '1;30,15' are [30,15], stored as a list of integers
+
+
 	def __init__(self, s): 
+		# Given a Sexagesimal Number as String
 		if (';' in str(s)):
-			self.base = 60
 			whole_and_frac = string.split(s, ";")
-			self.whole = int(whole_and_frac[0])
+			if ('-' not in str(whole_and_frac[0])):
+				self.negative = False
+			else:
+				self.negative = True
+
+			self.whole = abs(int(whole_and_frac[0]))
+			
 			if (',' in str(whole_and_frac[1])):
 				fracs = string.split(whole_and_frac[1], ",")
 				y = 1
@@ -14,80 +37,190 @@ class Sexagesimal:
 					self.parts.extend([int(x)])
 			else:
 				self.parts = [int(whole_and_frac[1])]
-		elif ('.' in str(s)):
-			self.base = 10
-			self.decfloat = float(s)
-		else:
-			self.whole = int(s)
 
+		# Given a Decimal Number
+		elif ('.' in str(s)):
+			if (float(s) >= 0):
+				self.negative = False
+			else:
+				self.negative = True 
+
+			i, d = divmod(float(s), 1)
+			self.whole = abs(int(i))
+			
+			self.parts = []
+			p = ''
+			x = 0
+			while (x < 3):
+				i,d = divmod(d * 60, 1)
+				self.parts.extend([int(i)])
+				if (d * 60 < 1):
+					break
+
+		# Given an Integer
+		elif (is_intable(s)):
+			if (int(s) >= 0):
+				self.negative = False
+			else:
+				self.negative = True
+			self.whole = abs(int(s))
+			self.parts = [0]
+
+		elif( s == ''):
+			pass
+
+		# Given nothing useful
+		else:
+			raise Exception('Cannot Sexagesimalize \'' + str(s) + '\'')
+
+
+
+	def to_decimal(self):
+		number_in_decimal = self.whole
+		fracs = self.parts
+		y = 1
+		for x in fracs:
+			x = float(x)
+			denom = pow(60, y)
+			number_in_decimal += x/denom
+			y += 1
+
+		if (self.negative):
+			number_in_decimal = number_in_decimal * -1
+
+		return number_in_decimal
+
+	# Move Evaluate to Main Calculator Section
+	def evaluate(self, a, b, operator):
+		if (operator == "*"):   return a * b
+		elif (operator == "+"): return a + b
+		elif (operator == ':'): return a / b
+		elif (operator == '-'): return a - b
+		elif (operator == '^'): return a ** b
+		else:
+			raise Exception(str(operator) + ' is not a valid operator.')
+
+	def __neg__(self):
+		a = Sexagesimal(str(self)) # TODO: Better way to copy?
+		if (self.negative == True):
+			a.negative = False
+		elif (self.negative == False):
+			a.negative = True
+		else:
+			a.negative = True
+		return a
+
+	def __abs__(self):
+		a = Sexagesimal(str(self)) # TODO: Better way to copy?
+		a.negative = False
+		return a
 
 	def __str__(self):
-		if (self.base == 60):
-			s  = str(self.whole) + ";"
-			places = len(self.parts)
-			for x in self.parts:
-				if (places > 1):
-					s += str(x) + ","
-				elif (places == 1):
-					s += str(x)
-				places -= 1
-			return s
-		elif (self.base == 10):
-			return str(self.decfloat)
-	
-	def evaluate(a, b, operator)
-		if (operator == "*"):
-			return Sexagesimal(decimal(x) * decimal(y))
-		elif (operator == "+"):
-			return self.add(a, b)
-		elif (operator == ':'):
-			return Sexagesimal(decimal(x) / decimal(y))
-		elif (operator == '-'):
-			return self.subtract(a, b)
-		elif (operator == '^'):
-			return Sexagesimal(decimal(x) ** decimal(y))
+		s = ''
+		self.trim(max_places)
+		if (self.negative == False):
+			s += ''
+		elif (self.negative == True):
+			s += '-'
 		else:
-			return 1000 #For debugging purposes
+			s += '!uns!'
 
-	def add(a, b):
-		places = max(len(a.parts), len(b.parts))
-		y = '0'
-		for x in range(1, places): y += ',0' 
-		result = Sexagesimal('0;' + y)
+		s  += str(self.whole) + ";"
+		places = len(self.parts)
+		for x in self.parts:
+			if (places > 1):
+				s += str(x) + ","
+			elif (places == 1):
+				s += str(x)
+			places -= 1
+		return s	
+	
+	def __add__(self, b):
+		a = self
+		# Is this actually a subtraction problem?
 
-		c = 1; carry = 0
-		while (c <= places):
-			x = carry; carry = 0
-			if (len(a.parts) > places - c): x += a.parts[places-c]
-			if (len(b.parts) > places - c): x += b.parts[places-c]
-			if (x >= 60): carry, x = divmod(x, 60)
-			result.parts[places-c] = x
-			c += 1
-		result.whole = a.whole + b.whole + carry
-		return result
+		if (a.negative == True and b.negative == True):
+			return -(abs(a) + abs(b))
+		elif (a.negative == True):
+			return b - abs(a)
+		elif (b.negative == True):
+			return abs(a) - abs(b)
+		else:
+			a = self
+			places = max(len(a.parts), len(b.parts))
+			y = '0'
+			for x in range(1, places): y += ',0' 
+			result = Sexagesimal('0;' + y)
 
-	def subtract(a, b):
-		places = max(len(a.parts), len(b.parts))
-		y = '0'
-		for x in range(1, places): y += ',0' 
-		result = Sexagesimal('0;' + y)
+			c = 1; carry = 0
+			while (c <= places):
+				x = carry; carry = 0
+				if (len(a.parts) > places - c): x += a.parts[places-c]
+				if (len(b.parts) > places - c): x += b.parts[places-c]
+				if (x >= 60): carry, x = divmod(x, 60)
+				result.parts[places-c] = x
+				c += 1
+			result.whole = a.whole + b.whole + carry
+			return result
 
-		c = 1; carry = 0
-		while (c <= places):
-			x = carry; carry = 0
-			if (len(a.parts) > places - c): x += a.parts[places-c]
-			else: x = 0 + carry
-			if (len(b.parts) > places - c): x -= b.parts[places-c]
-			if (x < 0): x += 60; carry = -1
-			result.parts[places-c] = x
-			c += 1
+	def __sub__(self, b):
+		a = self
 
-		result.whole = a.whole + b.whole + carry
-		return result
+		if (a.negative == True and b.negative == True):
+			return abs(b)-abs(a)
+		elif (a.negative == True):
+			return - (abs(a) + abs(b))
+		elif (b.negative == True):
+			return abs(a) + abs(b)
+		elif (b.to_decimal() > a.to_decimal()):
+			return - (b - a)
+		else:
+			places = max(len(a.parts), len(b.parts))
+			print "a and b", a, b
+			# Create a Blank Result
+			y = '0'
+			for x in range(1, places): y += ',0' 
+			result = Sexagesimal('0;' + y)
 
-a = Sexagesimal('2;0')
-b = Sexagesimal('0;15,15')
-print Sexagesimal.subtract(a, b)
+			c = places - 1; carry = 0
+			while (c >= 0):
+				x = carry; carry = 0
+				if (len(a.parts) > c):
+					x += a.parts[c]
+						
+				if (len(b.parts) > c):
+					x -= b.parts[c]
 
+				if (x < 0):
+					x += 60
+					carry = -1
 
+				result.parts[c] = x
+				c -= 1
 
+			if (a.whole == b.whole and carry == -1):
+				result.whole = 0
+				result.negative = True
+			else:
+				result.whole = a.whole - b.whole
+			return result
+
+	def __mul__(self, b):
+		a = self
+		return Sexagesimal(a.to_decimal() * b.to_decimal())
+
+	def __div__(self, b):
+		a = self
+		return Sexagesimal(a.to_decimal() / b.to_decimal())
+
+	def __pow__(self, b):
+		a = self
+		print "POW"
+		return Sexagesimal(a.to_decimal() ** b.to_decimal())
+
+	## TODO: Overwrite the comparison operators and replace usage of to_deciamal in comparators
+
+	def trim(self, places):
+		if (len(self.parts) > places):
+			self.parts = self.parts[0:places]
+		return self
