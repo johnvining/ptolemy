@@ -3,21 +3,12 @@ import string, math
 # TODO: Move this somewhere better:
 max_places = 6
 
-def is_intable(s):
-		try:
-			int(s)
-			return True
-		except:
-			return False
-
 class Sexagesimal:
 
 # 	A number is made of:
 # 	* negative: True or False
 # 	* whole: the whole-number portion of the number, stored as integer
 # 	* parts: the parts of '1;30,15' are [30,15], stored as a list of integers
-
-
 	def __init__(self, s): 
 		# Given a Sexagesimal Number as String
 		if (';' in str(s)):
@@ -57,21 +48,22 @@ class Sexagesimal:
 				if (d * 60 < 1):
 					break
 
-		# Given an Integer
-		elif (is_intable(s)):
-			if (int(s) >= 0):
-				self.negative = False
-			else:
-				self.negative = True
-			self.whole = abs(int(s))
-			self.parts = [0]
-
 		elif( s == ''):
 			pass
 
-		# Given nothing useful
 		else:
-			raise Exception('Cannot Sexagesimalize \'' + str(s) + '\'')
+			# Trying to see if it's a whole number
+			try:
+				if (int(s) >= 0):
+					self.negative = False
+				else:
+					self.negative = True
+				self.whole = abs(int(s))
+				self.parts = [0]
+
+			# Apparently not a whole number
+			except Exception as e:	
+				raise Exception('Cannot Sexagesimalize \'' + str(s) + '\'<br/><small>' + str(e) + "</small>")
 
 
 

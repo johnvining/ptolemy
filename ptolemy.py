@@ -32,14 +32,12 @@ def evaluate_query():
 
 	parts = []
 	for x in raw_parts:
-		if (";" in str(x) or "." in str(x)):
-			try:
-				parts.append(Sexagesimal(x))
-			except Exception as e:
-				error = e
-				return render_template('pt.html', result=result, error=Markup(error))
-		else:
-			parts.append(x)
+		try:
+			parts.append(Sexagesimal(x))
+		except:
+			# Anything that cannot be sexagesimalized is considered
+			# an operator.
+			parts.append(x)		
 	
 	while True:
 		try:
