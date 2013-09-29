@@ -1,3 +1,6 @@
+div .main_div
+	{width: 800px; text-align: left}
+
 div.page_title
 	{font-size: 30; color: white; text-align: left; background: #3385FF; padding: 12px; margin: 12; width: 500px}
 div.footer
@@ -15,12 +18,9 @@ div.controls
 div.warning
 	{color: white; font-size: 18; text-align: left; background: #FF9900; padding: 12px; margin:12px; width: 500px}
 div.error
-	{color: white; font-size: 18; text-align: left; background: #D14719; padding: 12px; margin:12px; width: 500px}
+	{color: white; font-size: 18; text-align: left; background: #cc6666; padding: 12px; margin:12px; width: 500px}
 div.error a {color: white; text-decoration: none; font-weight: bold;}
 div.error a:hover {text-decoration: underline;}
 
 span.section_header 
 	{font-size: 13; text-transform: uppercase;}
-
-div .main_div
-	{width: 800px; text-align: left}

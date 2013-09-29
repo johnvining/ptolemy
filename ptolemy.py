@@ -12,7 +12,6 @@ warning = '''
 			accurate. All numbers are trimed at six places.</small>
 		  '''
 
-
 @app.route('/', methods = ['GET','POST'])
 def evaluate_query():
 	error = ''; steps = []; result = ''

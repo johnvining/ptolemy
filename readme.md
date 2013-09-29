@@ -13,24 +13,16 @@ The calculator takes a query like `3;0 + 2;30 * 4;45,45` and returns a value in 
 
 ![](doc/example.png)
 
-### Todo and bugs
-
-Here is a very preliminary todo list:
-
-* Create a `Calculator` class to handle things like: deciding which triplet to evaluate next, evaluation of triplets, and trimming numbers. `evaluate()` should not be in the `Sexagesimal` class.
-* Write in a better way of setting place limits.
-* Create a more systematic way of testing and handling errors.
-* Rewrite `*`, `/`, `^` functions without reliance on to_decimal calculations.
-* Add support for parentheses
-* Add support for trigonometry, both calculated and using Ptolemy's values from the Chord Table
-* Add an option to pare numbers down to a certain number of places at each step to simulate calculation by hand.
-* Allow negative number as first number.
-
 ### Requirements
 
 Ptolemy requires [Flask](http://flask.pocoo.org).
 
 ### Recent Updates
+
+##### 2013-09-29
+
+* Removed `/query/` and centered the page.
+* Moved bug and enhancement list to Git Hub.
 
 ##### 2013-09-28
 

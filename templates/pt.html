@@ -9,7 +9,7 @@
 	<center>
 <div class="main_div">
 	<div class="page_title"><br><em>Ptolemy</em><br/>
-	<small><small>Sexagesimal Calculator</small></small></div>
+	<small><small>Sexagesimal Calculator</small></small></div>   
 
 	<!-- ERROR -->
 	{% if error %}
@@ -20,13 +20,16 @@
 	{% if instructions %}
 		<div class="controls">
 			<span class="section_header">Instructions</span><br/>
-			<small>Please enter a query below. Valid input includes sexagesimal numbers (3;30,5), to_decimal numbers, and the five basic operators: ^, +, -, *, and : for division.</small>
+			<small>Please enter a query below. Valid input includes sexagesimal numbers (3;30,5), decimal numbers (1.25, and the five basic operators: +, -, ^, *, and : for division.</small>
 		</div>
 	{% endif %}
 
 	<!-- WARNING -->
 	{% if warning %}
-		<div class="warning"><span class="section_header">Warning</span><br/>{{ warning}}</div>
+		<div class="warning">
+			<span class="section_header">Warning</span><br/>
+			{{ warning}}
+		</div>
 	{% endif %}
 
 	<!-- QUERY -->
@@ -40,7 +43,9 @@
 	<!-- STEPS -->
 	{% if steps %}
 		{% for step in steps%}
-		<div class="step">{{ step }}</div>
+		<div class="step">
+			{{ step }}
+		</div>
 		{% endfor %}
 	{% endif %}
 
@@ -65,7 +70,7 @@
 
 
 	<div class="footer">
-		<center>by John Vining &middot; <a href="https://github.com/senecando/ptolemy">Git Hub</a> &middot; <a href="mailto:johnvining@gmail.com">Contact</a></center>
+		<center><a href="https://github.com/senecando/ptolemy">Git Hub</a> &middot; <a href="mailto:johnvining@gmail.com">Contact</a></center>
 	</div>
 
 </div></center>
