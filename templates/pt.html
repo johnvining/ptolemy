@@ -6,62 +6,67 @@
       href="/static/style.css"/>
 </header>
 <body>
+	<center>
+<div class="main_div">
+	<div class="page_title"><br><em>Ptolemy</em><br/>
+	<small><small>Sexagesimal Calculator</small></small></div>
 
-<div class="page_title"><br><em>Ptolemy</em><br/>
-<small><small>Sexagesimal Calculator</small></small></div>
+	<!-- ERROR -->
+	{% if error %}
+		<div class="error"><span class="section_header">Error</span><br/>{{ error }}<br/></div>
+	{% endif %}
 
-<!-- ERROR -->
-{% if error %}
-	<div class="error"><span class="section_header">Error</span><br/>{{ error }}<br/></div>
-{% endif %}
+	<!-- INSTRUCTIONS -->
+	{% if instructions %}
+		<div class="controls">
+			<span class="section_header">Instructions</span><br/>
+			<small>Please enter a query below. Valid input includes sexagesimal numbers (3;30,5), to_decimal numbers, and the five basic operators: ^, +, -, *, and : for division.</small>
+		</div>
+	{% endif %}
 
-<!-- INSTRUCTIONS -->
-{% if instructions %}
-	<div class="controls">
-		<span class="section_header">Instructions</span><br/>
-		<small>Please enter a query below. Valid input includes sexagesimal numbers (3;30,5), to_decimal numbers, and the five basic operators: ^, +, -, *, and : for division.</small>
+	<!-- WARNING -->
+	{% if warning %}
+		<div class="warning"><span class="section_header">Warning</span><br/>{{ warning}}</div>
+	{% endif %}
+
+	<!-- QUERY -->
+	{% if query %}
+		<div class="controls">
+			<span class="section_header">Query</span><br/>
+			{{ query }}
+		</div>
+	{% endif %}
+
+	<!-- STEPS -->
+	{% if steps %}
+		{% for step in steps%}
+		<div class="step">{{ step }}</div>
+		{% endfor %}
+	{% endif %}
+
+	<!-- RESULT -->
+	{% if result %}
+		<div class="controls">
+			<span class="section_header">Result</span><br/>
+			{{ result }}
+		</div>
+		<div class="controls">
+			<span class="section_header">New Query</span><br/>
+			<form action="/" method="post" name="query">
+			<input type="text" name="query" value="{{ result }}"></form>
+		</div>
+	{% else %}
+		<div class="controls">
+			<span class="section_header">Query</span><br/>
+			<form action="/" method="post" name="query">
+			<input type="text" name="query"></form>
+		</div>
+	{% endif %}
+
+
+	<div class="footer">
+		<center>by John Vining &middot; <a href="https://github.com/senecando/ptolemy">Git Hub</a> &middot; <a href="mailto:johnvining@gmail.com">Contact</a></center>
 	</div>
-{% endif %}
 
-<!-- WARNING -->
-{% if warning %}
-	<div class="warning"><span class="section_header">Warning</span><br/>{{ warning}}</div>
-{% endif %}
-
-<!-- QUERY -->
-{% if query %}
-	<div class="controls">
-		<span class="section_header">Query</span><br/>
-		{{ query }}
-	</div>
-{% endif %}
-
-<!-- STEPS -->
-{% if steps %}
-	{% for step in steps%}
-	<div class="step">{{ step }}</div>
-	{% endfor %}
-{% endif %}
-
-<!-- RESULT -->
-{% if result %}
-	<div class="controls">
-		<span class="section_header">Result</span><br/>
-		{{ result }}
-	</div>
-	<div class="controls">
-		<span class="section_header">New Query</span><br/>
-		<form action="/query/" method="post" name="query">
-		<input type="text" name="query" value="{{ result }}"></form>
-	</div>
-{% else %}
-	<div class="controls">
-		<span class="section_header">Query</span><br/>
-		<form action="/query/" method="post" name="query">
-		<input type="text" name="query"></form>
-	</div>
-{% endif %}
-
-
-<div class="footer"><center>by John Vining &middot; <a href="https://github.com/senecando/ptolemy">Git Hub</a> &middot; <a href="mailto:johnvining@gmail.com">Contact</a></center></div>
+</div></center>
 </body></html>

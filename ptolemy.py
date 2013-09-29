@@ -12,16 +12,13 @@ warning = '''
 			accurate. All numbers are trimed at six places.</small>
 		  '''
 
-@app.route('/query/', methods=['GET'])
-@app.route('/')
-def ptolemy():
-	return render_template('pt.html', title="Ptolemy", instructions=True)
 
-@app.route('/query/', methods=['POST'])
+@app.route('/', methods = ['GET','POST'])
 def evaluate_query():
 	error = ''; steps = []; result = ''
-
-	if request.method == 'POST':
+	if request.method == 'GET':
+		return render_template('pt.html', instructions=True)
+	elif request.method == 'POST':
 		query = request.form['query']
 		query = re.sub(r'\/','\:', query)
 		query = re.sub(r'[^\w\*\+\-\/\:\^\;\,\.]', '', query)
@@ -30,44 +27,44 @@ def evaluate_query():
 		if (raw_parts == ['']):
 			error = "That query is not a query at all!"
 
-	parts = []
-	for x in raw_parts:
-		try:
-			parts.append(Sexagesimal(x))
-		except:
-			# Anything that cannot be sexagesimalized is considered
-			# an operator.
-			parts.append(x)		
-	
-	while True:
-		try:
-			if (len(parts) == 1):
-				result = parts[0]
-				break
-			elif (len(parts) < 4):
-				result = Sexagesimal('').evaluate(parts[0], parts[2], parts[1])
-				break
-			c = 0; triplets = []; length = len(parts) - 2	
-			
-			while (c < length):
-				triplets.extend([parts[c:c+3]])
-				c = c + 1
-			d = next_to_evaluate(triplets)
+		parts = []
+		for x in raw_parts:
+			try:
+				parts.append(Sexagesimal(x))
+			except:
+				# Anything that cannot be sexagesimalized is considered
+				# an operator.
+				parts.append(x)		
+		
+		while True:
+			try:
+				if (len(parts) == 1):
+					result = parts[0]
+					break
+				elif (len(parts) < 4):
+					result = Sexagesimal('').evaluate(parts[0], parts[2], parts[1])
+					break
+				c = 0; triplets = []; length = len(parts) - 2	
+				
+				while (c < length):
+					triplets.extend([parts[c:c+3]])
+					c = c + 1
+				d = next_to_evaluate(triplets)
 
-			# TODO: Create a Ptolemy Calc Class
-			subResult = Sexagesimal('').evaluate(parts[0], parts[2], parts[1])
-			parts.pop(d); parts.pop(d+1)
-			
-			parts[d] = subResult
-			steps.append(Markup(format_parts(parts)))
-		except Exception as e:
-			error = "There was a problem with the query: " + formatted_query + '<br/><small><small>Python sez: ' + str(e) + '</small></small>'
-			break
+				# TODO: Create a Ptolemy Calc Class
+				subResult = Sexagesimal('').evaluate(parts[0], parts[2], parts[1])
+				parts.pop(d); parts.pop(d+1)
+				
+				parts[d] = subResult
+				steps.append(Markup(format_parts(parts)))
+			except Exception as e:
+				error = "There was a problem with the query: " + formatted_query + '<br/><small><small>Python sez: ' + str(e) + '</small></small>'
+				break
 
-	if (error==''): 
-		return render_template('pt.html', steps=steps, result=Markup(result), query=Markup(formatted_query), warning=Markup(warning))
-	else:
-		return render_template('pt.html', result=result, error=Markup(error))
+		if (error==''): 
+			return render_template('pt.html', steps=steps, result=Markup(result), query=Markup(formatted_query), warning=Markup(warning))
+		else:
+			return render_template('pt.html', result=result, error=Markup(error))
 
 def next_to_evaluate(triplets):
 	order = ['^', '*', ':', '+', '-']

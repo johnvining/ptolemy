@@ -21,3 +21,6 @@ div.error a:hover {text-decoration: underline;}
 
 span.section_header 
 	{font-size: 13; text-transform: uppercase;}
+
+div .main_div
+	{width: 800px; text-align: left}

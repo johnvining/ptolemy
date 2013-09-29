@@ -20,7 +20,7 @@ Here is a very preliminary todo list:
 * Create a `Calculator` class to handle things like: deciding which triplet to evaluate next, evaluation of triplets, and trimming numbers. `evaluate()` should not be in the `Sexagesimal` class.
 * Write in a better way of setting place limits.
 * Create a more systematic way of testing and handling errors.
-* Rewrite main mathematical functions without reliance on to_decimal calculations.
+* Rewrite `*`, `/`, `^` functions without reliance on to_decimal calculations.
 * Add support for parentheses
 * Add support for trigonometry, both calculated and using Ptolemy's values from the Chord Table
 * Add an option to pare numbers down to a certain number of places at each step to simulate calculation by hand.
