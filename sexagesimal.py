@@ -194,7 +194,7 @@ class Sexagesimal:
 				result.whole = 0
 				result.negative = True
 			else:
-				result.whole = a.whole - b.whole
+				result.whole = a.whole - b.whole + carry
 			return result
 
 	def __mul__(self, b):
