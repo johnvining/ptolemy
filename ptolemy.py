@@ -20,7 +20,10 @@ def evaluate_query():
 	elif request.method == 'POST':
 		query = request.form['query']
 		query = re.sub(r'\/','\:', query)
-		query = re.sub(r'[^\w\*\+\-\/\:\^\;\,\.]', '', query)
+		re_only_alphanumeric_and_operators = re.compile(r'[^\w\*\+\-\/\:\^\;\,\.]')
+		if re_only_alphanumeric_and_operators.search(query) is not None:
+			error = "There was a problem with the query: " + str(query) + "<br/><small><small>This query contains characters that are not letters, numbers or operators.</small></small>"
+			return render_template('pt.html', result=result, error=Markup(error))
 		raw_parts = re.split('([\*\+\-\:\^])', query)	
 		formatted_query = format_parts(raw_parts)
 		if (raw_parts == ['']):
