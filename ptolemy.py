@@ -18,27 +18,12 @@ def evaluate_query():
 	if request.method == 'GET':
 		return render_template('pt.html', instructions=True)
 	elif request.method == 'POST':
-		query = request.form['query']
-		query = re.sub(r'\/','\:', query)
-		re_only_alphanumeric_and_operators = re.compile(r'[^\w\*\+\-\/\:\^\;\,\.]')
-		if re_only_alphanumeric_and_operators.search(query) is not None:
-			error = "There was a problem with the query: " + str(query) + "<br/><small><small>This query contains characters that are not letters, numbers or operators.</small></small>"
-			return render_template('pt.html', result=result, error=Markup(error))
-		raw_parts = re.split('([\*\+\-\:\^])', query)	
-		formatted_query = format_parts(raw_parts)
-		if (raw_parts == ['']):
-			error = "That query is not a query at all!"
+		parts, formatted_query, error = parse_query(request.form['query'])	
+		if (error != ''):
+			return render_template('pt.html', instructions=True, error=Markup(error))
 
-		parts = []
-		for x in raw_parts:
-			try:
-				parts.append(Sexagesimal(x))
-			except:
-				# Anything that cannot be sexagesimalized is considered
-				# an operator.
-				parts.append(x)		
-		
 		while True:
+			
 			try:
 				if (len(parts) == 1):
 					result = parts[0]
@@ -54,7 +39,7 @@ def evaluate_query():
 				d = next_to_evaluate(triplets)
 
 				# TODO: Create a Ptolemy Calc Class
-				subResult = Sexagesimal('').evaluate(parts[0], parts[2], parts[1])
+				subResult = Sexagesimal('').evaluate(parts[d], parts[d+2], parts[d+1])
 				parts.pop(d); parts.pop(d+1)
 				
 				parts[d] = subResult
@@ -77,6 +62,31 @@ def next_to_evaluate(triplets):
 				return c
 			c += 1
 	return 0
+
+
+def parse_query(query):
+	error = ''
+
+	query = re.sub(r'\/','\:', query)
+	re_only_alphanumeric_and_operators = re.compile(r'[^\w\*\+\-\/\:\^\;\,\.]')
+	if re_only_alphanumeric_and_operators.search(query) is not None:
+		error = "There was a problem with the query: " + str(query) + "<br/><small><small>This query contains characters that are not letters, numbers or operators.</small></small>"
+	
+	raw_parts = re.split('([\*\+\-\:\^])', query)
+
+	if (raw_parts == ['']):
+		error = "That query is not a query at all!"
+
+	parts = []
+	for x in raw_parts:
+		try:
+			parts.append(Sexagesimal(x))
+		except:
+			# Anything that cannot be sexagesimalized is considered
+			# an operator.
+			parts.append(x)
+
+	return parts, format_parts(raw_parts), error
 
 def format_parts(parts):
 	html = ''; endSuper = False
@@ -103,9 +113,13 @@ def create_alert(kind, text):
 	html = '<div class="%s">%s</div>' % (kind, text)
 	return html
 
+def print_error(s):
+	print s
+	sys.stdout.flush()
+
 def print_list(listy):
 	html = "<ul>"
 	for x in listy:
-		html += '<li>%s</li>' % x
+		html += '<li>%s</li>' % str(x)
 	html += '</ul>'
 	return html

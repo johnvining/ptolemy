@@ -1,4 +1,4 @@
-import string, math
+import string, math, sys
 
 # TODO: Move this somewhere better:
 max_places = 6
@@ -84,7 +84,7 @@ class Sexagesimal:
 
 	# Move Evaluate to Main Calculator Section
 	def evaluate(self, a, b, operator):
-		if (operator == "*"):   return a * b
+		if (operator == "*"): return a * b
 		elif (operator == "+"): return a + b
 		elif (operator == ':'): return a / b
 		elif (operator == '-'): return a - b
@@ -168,7 +168,6 @@ class Sexagesimal:
 			return - (b - a)
 		else:
 			places = max(len(a.parts), len(b.parts))
-			print "a and b", a, b
 			# Create a Blank Result
 			y = '0'
 			for x in range(1, places): y += ',0' 
@@ -207,7 +206,6 @@ class Sexagesimal:
 
 	def __pow__(self, b):
 		a = self
-		print "POW"
 		return Sexagesimal(a.to_decimal() ** b.to_decimal())
 
 	## TODO: Overwrite the comparison operators and replace usage of to_deciamal in comparators
