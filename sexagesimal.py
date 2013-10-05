@@ -212,7 +212,9 @@ class Sexagesimal:
 
 	def __pow__(self, b):
 		a = self
-		return Sexagesimal(a.to_decimal() ** b.to_decimal())
+		result = a.to_decimal() ** b.to_decimal()
+		result = Sexagesimal(str(result))
+		return result
 
 	## TODO: Overwrite the comparison operators and replace usage of to_deciamal in comparators
 
