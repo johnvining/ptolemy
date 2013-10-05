@@ -27,7 +27,6 @@ class Calculator:
 
 			if z == "-" and (operators_as_strings.search(z_l) is not None or z_l == ''):
 				q += "~"
-				print z; sys.stdout.flush()
 			else:
 				q += z
 			z_l = z

@@ -89,16 +89,6 @@ class Sexagesimal:
 
 		return number_in_decimal
 
-	# Move Evaluate to Main Calculator Section
-	def evaluate(self, a, b, operator):
-		if (operator == "*"): return a * b
-		elif (operator == "+"): return a + b
-		elif (operator == ':'): return a / b
-		elif (operator == '-'): return a - b
-		elif (operator == '^'): return a ** b
-		else:
-			raise Exception(str(operator) + ' is not a valid operator.')
-
 	def __neg__(self):
 		a = Sexagesimal(str(self)) # TODO: Better way to copy?
 		if (self.negative == True):
@@ -214,6 +204,26 @@ class Sexagesimal:
 	def __pow__(self, b):
 		a = self
 		return Sexagesimal(a.to_decimal() ** b.to_decimal())
+
+	def __cmp__(self, b):
+		a = self.to_decimal()
+		if type(b) != float and type(b) != int:
+			b = b.to_decimal()
+		
+		if a > b:
+			return 1
+		elif a == b:
+			return 0
+		elif a < b:
+			return -1
+
+	def __eq__(self, b):
+		if type(b) == unicode or type(b) == str:
+			return False
+		elif type(b) == float or type(b) == int:
+			return self.to_decimal() == b
+		elif self.to_decimal() == b.to_decimal():
+			return True
 
 	## TODO: Overwrite the comparison operators and replace usage of to_deciamal in comparators
 

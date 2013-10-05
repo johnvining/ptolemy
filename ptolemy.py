@@ -77,14 +77,14 @@ def evaluate_query():
 
 
 def format_query_list(query_list):
-	html = ''; endSuper = False
+	html = ''; end_super = False
 	for x in query_list:
 		if (x == '^'):
 			html += '<sup>'
-			endSuper = True
-		elif (endSuper):
+			end_super = True
+		elif (end_super):
 			html += str(x) + '</sup>'
-			endSuper = False
+			end_super = False
 		elif (x == '+'):
 			html += ' <b>+</b> '
 		elif (x == '*'):
