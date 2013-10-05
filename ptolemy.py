@@ -1,6 +1,7 @@
 import os, sys, string, re
 from flask import Flask, url_for, render_template, request, Markup
 from sexagesimal import *
+from calculator import *
 
 app = Flask(__name__)
 app.debug = True
@@ -22,21 +23,24 @@ def evaluate_query():
 	
 	elif request.method == 'POST':
 		# If method = Post, parse the query
-		parts, formatted_query, error = parse_query(request.form['query'])	
+		calc = Calculator()
+		query_list, error = calc.parse_query(request.form['query'])	
+		formatted_query = format_query_list(query_list)
 		if (error != ''):
 			# If there is an error with parsing, stop, and return an error page.
 			return render_template('pt.html', instructions=True, error=Markup(error))
 
+		
 		steps = []; result = ''
 		while True:	
 			try:
-				if (len(parts) == 1):
+				if (len(query_list) == 1):
 					# If the query is a single number 
-					result = parts[0]
+					result = query_list[0]
 					break
-				elif (len(parts) == 3):
+				elif (len(query_list) == 3):
 					# If the query has been solved down the last triplet, evaluate and set result
-					result = Sexagesimal('').evaluate(parts[0], parts[2], parts[1])
+					result = calc.evaluate(query_list[0], query_list[2], query_list[1])
 					break
 
 				# If neither of the above catches, we need to 
@@ -47,20 +51,20 @@ def evaluate_query():
 				#
 				# A triplet looks like: [2;3, '*', 1;0]; the numbers
 				#  are stored as Sexagesimal objects.
-				c = 0; triplets = []; length = len(parts) - 2
+				c = 0; triplets = []; length = len(query_list) - 2
 				while (c < length):
-					triplets.extend([parts[c:c+3]])
+					triplets.extend([query_list[c:c+3]])
 					c = c + 1
-				d = next_to_evaluate(triplets)
+				d = calc.next_to_evaluate(triplets)
 
 				# Evaluate this triplet and insert answer into first
-				#  spot in list, pop out the other two parts in parts
-				sub_result = Sexagesimal('').evaluate(parts[d], parts[d+2], parts[d+1])
-				parts.pop(d); parts.pop(d+1)
-				parts[d] = sub_result
+				#  spot in list, pop out the other two query_list in query_list
+				sub_result = calc.evaluate(query_list[d], query_list[d+2], query_list[d+1])
+				query_list.pop(d); query_list.pop(d+1)
+				query_list[d] = sub_result
 
 				# Append the HTML for this step to steps
-				steps.append(Markup(format_parts(parts)))
+				steps.append(Markup(format_query_list(query_list)))
 			except Exception as e:
 				error = "There was a problem with the query: " + formatted_query + '<br/><small><small>Python sez: ' + str(e) + '</small></small>'
 				break
@@ -70,62 +74,11 @@ def evaluate_query():
 		else:
 			return render_template('pt.html', result=result, error=Markup(error))
 
-def next_to_evaluate(triplets):
-	order = ['^', '*', ':', '+', '-']
-	for operator in order:
-		c = 0
-		for x in triplets:		
-			if (x[1] == operator):
-				return c
-			c += 1
-	return 0
 
 
-def parse_query(query):
-	error = ''
-
-	query = re.sub(r'\/',':', query)
-	re_only_alphanumeric_and_operators = re.compile(r'[^\w\*\+\-\/\:\^\;\,\.]')
-	if re_only_alphanumeric_and_operators.search(query) is not None:
-		error = "There was a problem with the query: " + str(query) + "<br/><small><small>This query contains characters that are not letters, numbers or operators.</small></small>"
-	
-	operators_as_strings = re.compile(r'[\*\+\-\:\^]')
-	q = ''; z_l = ''
-	for z in query:
-		# IF it's a minus sign AND
-		#  It's the first character OR
-		#  It comes after another operator
-		# THEN: Replace w/ ~
-
-		if z == "-" and (operators_as_strings.search(z_l) is not None or z_l == ''):
-			q += "~"
-			print z; sys.stdout.flush()
-		else:
-			q += z
-		z_l = z
-	query = q
-
-	raw_parts = re.split('([\*\+\-\:\^])', query)
-
-	if (raw_parts == ['']):
-		error = "That query is not a query at all!"
-
-	parts = []
-	for x in raw_parts:
-		try:
-			parts.append(Sexagesimal(x))
-		except:
-			# Anything that cannot be sexagesimalized is considered
-			# an operator. This will change with unary operators.
-
-			parts.append(x)
-
-	print print_list(parts)
-	return parts, format_parts(parts), error
-
-def format_parts(parts):
+def format_query_list(query_list):
 	html = ''; endSuper = False
-	for x in parts:
+	for x in query_list:
 		if (x == '^'):
 			html += '<sup>'
 			endSuper = True
