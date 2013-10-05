@@ -14,35 +14,52 @@ warning = '''
 
 @app.route('/', methods = ['GET','POST'])
 def evaluate_query():
-	error = ''; steps = []; result = ''
+	error = ''
+
 	if request.method == 'GET':
+		# If there is no query, display the basic page with instructions
 		return render_template('pt.html', instructions=True)
+	
 	elif request.method == 'POST':
+		# If method = Post, parse the query
 		parts, formatted_query, error = parse_query(request.form['query'])	
 		if (error != ''):
+			# If there is an error with parsing, stop, and return an error page.
 			return render_template('pt.html', instructions=True, error=Markup(error))
 
-		while True:
-			
+		steps = []; result = ''
+		while True:	
 			try:
 				if (len(parts) == 1):
+					# If the query is a single number 
 					result = parts[0]
 					break
-				elif (len(parts) < 4):
+				elif (len(parts) == 3):
+					# If the query has been solved down the last triplet, evaluate and set result
 					result = Sexagesimal('').evaluate(parts[0], parts[2], parts[1])
 					break
-				c = 0; triplets = []; length = len(parts) - 2	
+
+				# If neither of the above catches, we need to 
+				#  do the next step in the calculation
 				
+				# Split into triplets and pick the next triplet to
+				#  evaluate based on order of operations
+				#
+				# A triplet looks like: [2;3, '*', 1;0]; the numbers
+				#  are stored as Sexagesimal objects.
+				c = 0; triplets = []; length = len(parts) - 2
 				while (c < length):
 					triplets.extend([parts[c:c+3]])
 					c = c + 1
 				d = next_to_evaluate(triplets)
 
-				# TODO: Create a Ptolemy Calc Class
+				# Evaluate this triplet and insert answer into first
+				#  spot in list, pop out the other two parts in parts
 				sub_result = Sexagesimal('').evaluate(parts[d], parts[d+2], parts[d+1])
 				parts.pop(d); parts.pop(d+1)
-				
 				parts[d] = sub_result
+
+				# Append the HTML for this step to steps
 				steps.append(Markup(format_parts(parts)))
 			except Exception as e:
 				error = "There was a problem with the query: " + formatted_query + '<br/><small><small>Python sez: ' + str(e) + '</small></small>'
@@ -75,6 +92,11 @@ def parse_query(query):
 	operators_as_strings = re.compile(r'[\*\+\-\:\^]')
 	q = ''; z_l = ''
 	for z in query:
+		# IF it's a minus sign AND
+		#  It's the first character OR
+		#  It comes after another operator
+		# THEN: Replace w/ ~
+
 		if z == "-" and (operators_as_strings.search(z_l) is not None or z_l == ''):
 			q += "~"
 			print z; sys.stdout.flush()
@@ -94,7 +116,8 @@ def parse_query(query):
 			parts.append(Sexagesimal(x))
 		except:
 			# Anything that cannot be sexagesimalized is considered
-			# an operator.
+			# an operator. This will change with unary operators.
+
 			parts.append(x)
 
 	print print_list(parts)

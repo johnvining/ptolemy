@@ -11,7 +11,12 @@ class Sexagesimal:
 # 	* parts: the parts of '1;30,15' are [30,15], stored as a list of integers
 	def __init__(self, s): 
 		# Given a Sexagesimal Number as String
-		s = re.sub(r'\~','-', s)
+		try:
+			# If you can, change any ~ to -. If it doesn't work,
+			#  it's problably a float.
+			s = re.sub(r'\~','-', s)
+		except Exception, e:
+			pass
 
 		if (';' in str(s)):
 			whole_and_frac = string.split(s, ";")
@@ -31,7 +36,7 @@ class Sexagesimal:
 			else:
 				self.parts = [int(whole_and_frac[1])]
 
-		# Given a Decimal Number
+		# Given a Decimal Number _as string_
 		elif ('.' in str(s)):
 			if (float(s) >= 0):
 				self.negative = False
@@ -200,21 +205,15 @@ class Sexagesimal:
 
 	def __mul__(self, b):
 		a = self
-		result = a.to_decimal() * b.to_decimal()
-		result = Sexagesimal(str(result))
-		return result
+		return Sexagesimal(a.to_decimal() * b.to_decimal())
 
 	def __div__(self, b):
 		a = self
-		result = a.to_decimal() / b.to_decimal()
-		result = Sexagesimal(str(result))
-		return result
+		return Sexagesimal(a.to_decimal() / b.to_decimal())
 
 	def __pow__(self, b):
 		a = self
-		result = a.to_decimal() ** b.to_decimal()
-		result = Sexagesimal(str(result))
-		return result
+		return Sexagesimal(a.to_decimal() ** b.to_decimal())
 
 	## TODO: Overwrite the comparison operators and replace usage of to_deciamal in comparators
 
