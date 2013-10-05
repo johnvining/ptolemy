@@ -39,10 +39,10 @@ def evaluate_query():
 				d = next_to_evaluate(triplets)
 
 				# TODO: Create a Ptolemy Calc Class
-				subResult = Sexagesimal('').evaluate(parts[d], parts[d+2], parts[d+1])
+				sub_result = Sexagesimal('').evaluate(parts[d], parts[d+2], parts[d+1])
 				parts.pop(d); parts.pop(d+1)
 				
-				parts[d] = subResult
+				parts[d] = sub_result
 				steps.append(Markup(format_parts(parts)))
 			except Exception as e:
 				error = "There was a problem with the query: " + formatted_query + '<br/><small><small>Python sez: ' + str(e) + '</small></small>'
@@ -67,11 +67,22 @@ def next_to_evaluate(triplets):
 def parse_query(query):
 	error = ''
 
-	query = re.sub(r'\/','\:', query)
+	query = re.sub(r'\/',':', query)
 	re_only_alphanumeric_and_operators = re.compile(r'[^\w\*\+\-\/\:\^\;\,\.]')
 	if re_only_alphanumeric_and_operators.search(query) is not None:
 		error = "There was a problem with the query: " + str(query) + "<br/><small><small>This query contains characters that are not letters, numbers or operators.</small></small>"
 	
+	operators_as_strings = re.compile(r'[\*\+\-\:\^]')
+	q = ''; z_l = ''
+	for z in query:
+		if z == "-" and (operators_as_strings.search(z_l) is not None or z_l == ''):
+			q += "~"
+			print z; sys.stdout.flush()
+		else:
+			q += z
+		z_l = z
+	query = q
+
 	raw_parts = re.split('([\*\+\-\:\^])', query)
 
 	if (raw_parts == ['']):
@@ -86,7 +97,8 @@ def parse_query(query):
 			# an operator.
 			parts.append(x)
 
-	return parts, format_parts(raw_parts), error
+	print print_list(parts)
+	return parts, format_parts(parts), error
 
 def format_parts(parts):
 	html = ''; endSuper = False

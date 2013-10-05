@@ -1,4 +1,4 @@
-import string, math, sys
+import string, math, sys, re
 
 # TODO: Move this somewhere better:
 max_places = 6
@@ -11,6 +11,8 @@ class Sexagesimal:
 # 	* parts: the parts of '1;30,15' are [30,15], stored as a list of integers
 	def __init__(self, s): 
 		# Given a Sexagesimal Number as String
+		s = re.sub(r'\~','-', s)
+
 		if (';' in str(s)):
 			whole_and_frac = string.split(s, ";")
 			if ('-' not in str(whole_and_frac[0])):
@@ -198,11 +200,15 @@ class Sexagesimal:
 
 	def __mul__(self, b):
 		a = self
-		return Sexagesimal(a.to_decimal() * b.to_decimal())
+		result = a.to_decimal() * b.to_decimal()
+		result = Sexagesimal(str(result))
+		return result
 
 	def __div__(self, b):
 		a = self
-		return Sexagesimal(a.to_decimal() / b.to_decimal())
+		result = a.to_decimal() / b.to_decimal()
+		result = Sexagesimal(str(result))
+		return result
 
 	def __pow__(self, b):
 		a = self

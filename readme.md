@@ -19,6 +19,11 @@ Ptolemy requires [Flask](http://flask.pocoo.org).
 
 ### Recent Updates
 
+##### circa 2013-10-04
+
+* Added ability to input negative numbers. Try: `1*-3` or `-3*2`.
+* Fixed some bugs. Look at issues on Git Hub for more information.
+
 ##### 2013-09-29
 
 * Removed `/query/` and centered the page.
