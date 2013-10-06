@@ -23,11 +23,16 @@ def evaluate_query():
 	elif request.method == 'POST':
 		# If method = Post, parse the query
 		calc = Calculator()
-		query_list, error = calc.parse_query(request.form['query'])	
-		formatted_query = format_query_list(query_list)
-		if (error != ''):
-			# If there is an error with parsing, stop, and return an error page.
-			return render_template('pt.html', instructions=True, error=Markup(error))
+		query_list, e = calc.parse_query(request.form['query'])
+		error += e + "<br/><br/>"
+		try:
+			formatted_query = format_query_list(query_list)
+		except Exception as e:
+			error = str(query_list) + "<br/><br/>"
+			error = str(e) + "<br/><br/>"
+		# if (error != ''):
+		# 	# If there is an error with parsing, stop, and return an error page.
+		# 	return render_template('pt.html', instructions=True, error=Markup(error))
 
 		
 		steps = []; result = ''
@@ -65,12 +70,15 @@ def evaluate_query():
 				# Append the HTML for this step to steps
 				steps.append(Markup(format_query_list(query_list)))
 			except Exception as e:
-				error = '<span class="expression"><center>' + formatted_query + '</center></span><br/>'
+				try:
+					error += '<span class="expression"><center>' + formatted_query + '</center></span><br/>'
+				except Exception as e_1:
+					error += str(e_1) + "<br/><br/>"
 				error += "There was a problem with the query. Python sez: " + str(e)
 				break
 
 		if (error==''): 
-			return render_template('pt.html', steps=steps, result=Markup(result), query=Markup(formatted_query), warning='')
+			return render_template('pt.html', steps=steps, result=Markup(result), warning='')
 		else:
 			return render_template('pt.html', result=result, error=Markup(error))
 
