@@ -1,16 +1,15 @@
 import os, sys, string, re
 from flask import Flask, url_for, render_template, request, Markup
-from sexagesimal import *
 from calculator import *
 
 app = Flask(__name__)
 app.debug = True
 
 warning = '''
-			<small>Multiplication and division calculations are
+			Multiplication and division calculations are
 			conducted by first converting the number to decimal, performing
 			the multiplcation and converting back. This is not completely
-			accurate. All numbers are trimed at six places.</small>
+			accurate. All numbers are trimed at six places.
 		  '''
 
 @app.route('/', methods = ['GET','POST'])
@@ -19,7 +18,7 @@ def evaluate_query():
 
 	if request.method == 'GET':
 		# If there is no query, display the basic page with instructions
-		return render_template('pt.html', instructions=True)
+		return render_template('pt.html', instructions=False)
 	
 	elif request.method == 'POST':
 		# If method = Post, parse the query
@@ -66,11 +65,12 @@ def evaluate_query():
 				# Append the HTML for this step to steps
 				steps.append(Markup(format_query_list(query_list)))
 			except Exception as e:
-				error = "There was a problem with the query: " + formatted_query + '<br/><small><small>Python sez: ' + str(e) + '</small></small>'
+				error = '<span class="expression"><center>' + formatted_query + '</center></span><br/>'
+				error += "There was a problem with the query. Python sez: " + str(e)
 				break
 
 		if (error==''): 
-			return render_template('pt.html', steps=steps, result=Markup(result), query=Markup(formatted_query), warning=Markup(warning))
+			return render_template('pt.html', steps=steps, result=Markup(result), query=Markup(formatted_query), warning='')
 		else:
 			return render_template('pt.html', result=result, error=Markup(error))
 

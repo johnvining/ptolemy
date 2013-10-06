@@ -13,61 +13,76 @@
 
 	<!-- ERROR -->
 	{% if error %}
-		<div class="error"><span class="section_header">Error</span><br/>{{ error }}<br/></div>
+		<div class="error_header"><span class="header">ERROR</span></div>
+		<div class="error">
+			{{ error }}
+		</div>
 	{% endif %}
 
 	<!-- INSTRUCTIONS -->
 	{% if instructions %}
+		<div class="controls_header">INSTRUCTIONS</div>
 		<div class="controls">
-			<span class="section_header">Instructions</span><br/>
-			<small>Please enter a query below. Valid input includes sexagesimal numbers (3;30,5), decimal numbers (1.25), and the five basic operators: +, -, ^, *, and : for division.</small>
+			Please enter a query below. Valid input includes sexagesimal numbers (3;30,5), decimal numbers (1.25), and the five basic operators: +, -, ^, *, and : for division.
 		</div>
 	{% endif %}
 
 	<!-- WARNING -->
+
 	{% if warning %}
+		<div class="warning_header"><span class="header">WARNING</span></div>
 		<div class="warning">
-			<span class="section_header">Warning</span><br/>
 			{{ warning}}
 		</div>
 	{% endif %}
 
-	<!-- QUERY -->
-	{% if query %}
-		<div class="controls">
-			<span class="section_header">Query</span><br/>
-			{{ query }}
-		</div>
-	{% endif %}
-
 	<!-- STEPS -->
-	{% if steps %}
-		{% for step in steps%}
-		<div class="step">
-			{{ step }}
-		</div>
-		{% endfor %}
-	{% endif %}
+
 
 	<!-- RESULT -->
-	{% if result %}
+	<!-- <div class="controls_header">Result</div> -->
+	
+		{% if result %}
+		<div class="controls_header">QUERY</div>
 		<div class="controls">
-			<span class="section_header">Result</span><br/>
-			{{ result }}
+				<div class="step">
+					<center><span class="expression">{{ query }}</span></center>
+				</div>
 		</div>
-		<div class="controls">
-			<span class="section_header">New Query</span><br/>
-			<form action="/" method="post" name="query">
-			<input type="text" name="query" value="{{ result }}"></form>
-		</div>
-	{% else %}
-		<div class="controls">
-			<span class="section_header">Query</span><br/>
-			<form action="/" method="post" name="query">
-			<input type="text" name="query"></form>
-		</div>
-	{% endif %}
 
+		{% if steps %}
+		<div class="controls_header">STEPS</div>
+		<div class="controls">
+			{% for step in steps%}
+				<div class="step"><center><span class="expression">{{ step }}</span></center></div>
+			{% endfor %}
+		</div>
+		{% endif %}
+		
+
+		<div class="controls_header">RESULT &amp; NEW QUERY</div>
+		<div class="controls">
+					<!-- <div class="step">
+						<center><span class="expression">{{ result }}</span></center>
+					</div> -->
+				<form action="/" method="post" name="query"><input type="text" name="query" value="{{ result }}"></form>
+		</div>
+		
+
+
+		{% else %}
+			{% if error %}
+			<div class="controls_header">ENTER A NEW QUERY</div>
+			{% else %}
+			<div class="controls_header">ENTER A QUERY</div>
+			{% endif %}
+			<div class="controls">
+				<form action="/" method="post" name="query">
+				<input type="text" name="query"></form>
+			</div>
+			
+		{% endif %}
+	
 
 	<div class="footer">
 		<center><a href="https://github.com/senecando/ptolemy/releases/tag/v0.1-alpha">v0.1</a> &middot; <a href="https://github.com/senecando/ptolemy">Git Hub</a> &middot; <a href="mailto:johnvining@gmail.com">Contact</a></center>

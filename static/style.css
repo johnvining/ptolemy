@@ -1,26 +1,131 @@
-div .main_div
-	{width: 800px; text-align: left}
+div.main_div
+	{width: 500px;
+	text-align: center}
 
 div.page_title
-	{font-size: 30; color: white; text-align: left; background: #3385FF; padding: 12px; margin: 12; width: 500px}
+	{font-size: 30;
+	color: #3385FF;
+	text-align: left;
+	width: 100%;
+	padding: 15px;
+	margin: 15px;
+	border-bottom: 2px solid #3385FF;}
 div.footer
-	{font-size: 12; color: black; text-align: left; padding: 12px; margin: 12; width: 500px}
-div.footer a {color: black; text-decoration: none;}
-div.footer a:hover {text-decoration: underline;}
+	{color: #555D73;
+	font-size: 12px;
+	text-align: left;
+	width: 100%;
+	padding: 13px;
+	margin: 15px;
+	margin-top: 0px;
+	font-family: "Consolas"}
 
-input
-	{font-size:18px; width: 100%; height: 30px; margin: 0px; padding: 0px;}
 
-div.step
-	{font-size: 18; text-align: left; background: #D9D9D9; padding: 12px; margin: 12; width: 500px}
-div.controls
-	{color: white; font-size: 18; text-align: left; background: #555D73; padding: 12px; margin:12px; width: 500px}
+div.footer a {
+	color: black;
+	text-decoration: none;}
+div.footer a:hover {
+	text-decoration: underline;}
+
+form {display: block;
+font-size: 0; padding: 0;}
+
+input[type=text] {
+    display: block;
+    border: 2px solid #555D73;
+    padding: 13px;
+    width: 100%;
+    font-size: 18px;
+    color: #555D73;
+    text-align: center;
+    font-family: "Consolas";
+}
+
+div.step {
+	color: #555D73;
+	text-align: left;
+	width: 100%;
+	padding-bottom: 5px;
+	padding-bottom: 5px;
+	margin-top: 0px;
+}
+
+span.expression {
+	font-size: 18px;
+	font-family: "Consolas";
+}
+
+div.warning_header
+	{color: white;
+	font-size: 18;
+	text-align: left;
+	background: #FF9900;
+	width: 100%;
+	padding: 15px;
+	padding-top: 5px;
+	padding-bottom: 0px;
+	margin-bottom: 0px;
+	margin-left: 15px;
+	margin-right: 15px;
+	font-family: "Consolas";
+	font-size: 12px;}
+
 div.warning
-	{color: white; font-size: 18; text-align: left; background: #FF9900; padding: 12px; margin:12px; width: 500px}
-div.error
-	{color: white; font-size: 18; text-align: left; background: #cc6666; padding: 12px; margin:12px; width: 500px}
-div.error a {color: white; text-decoration: none; font-weight: bold;}
-div.error a:hover {text-decoration: underline;}
+	{color: #555D73;
+	text-align: left;
+	width: 100%;
+	padding: 13px;
+	margin: 15px;
+	margin-top: 0px; 
+	border: 2px solid #FF9900;}
 
-span.section_header 
-	{font-size: 13; text-transform: uppercase;}
+div.error
+	{color: #555D73;
+	text-align: left;
+	width: 100%;
+	padding: 13px;
+	margin: 15px;
+	margin-top: 0px; 
+	border: 2px solid #cc6666;}
+
+div.error_header
+	{color: white;
+	font-size: 18;
+	text-align: left;
+	background: #cc6666;
+	width: 100%;
+	padding: 15px;
+	padding-top: 5px;
+	padding-bottom: 0px;
+	margin-bottom: 0px;
+	margin-left: 15px;
+	margin-right: 15px;
+	font-family: "Consolas";
+	font-size: 12px;}
+
+div.controls
+	{color: #555D73;
+	text-align: left;
+	width: 100%;
+	padding: 13px;
+	margin: 15px;
+	margin-top: 0px; 
+	border: 2px solid white;
+	font-size: 16px}
+
+div.controls_header
+	{color: #555D73;
+	font-size: 18;
+	text-align: left;
+	background: white;
+	width: 100%;
+	padding: 15px;
+	padding-top: 5px;
+	padding-bottom: 0px;
+	margin-bottom: 0px;
+	margin-left: 15px;
+	margin-right: 15px;
+	font-family: "Consolas";
+	font-size: 12px;}
+
+

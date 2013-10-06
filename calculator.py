@@ -37,6 +37,7 @@ class Calculator:
 		if (raw_query_list == ['']):
 			error = "That query is not a query at all!"
 
+		# TODO: Remove hard-coded reference to Sexagesimal()
 		query_list = []
 		for x in raw_query_list:
 			try:
