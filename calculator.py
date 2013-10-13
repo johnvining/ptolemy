@@ -45,7 +45,7 @@ class Calculator:
 			except:
 				# Anything that cannot be sexagesimalized is considered
 				# an operator. This will change with unary operators.
-
+				print "could not sexagesimalize" + str(x); sys.stdout.flush()
 				query_list.append(x)
 
 		return query_list, error

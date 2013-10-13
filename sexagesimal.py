@@ -1,7 +1,7 @@
 import string, math, sys, re
 
 # TODO: Move this somewhere better:
-max_places = 6
+max_places = 3
 
 class Sexagesimal:
 
@@ -17,6 +17,14 @@ class Sexagesimal:
 			s = re.sub(r'\~','-', s)
 		except Exception, e:
 			pass
+
+		self.unary = ''
+		# Decide if there is a unary operator attached
+		if 'crd' in str(s):
+			self.unary = 'crd'
+			s = re.sub(r'[a-zA-Z]+','', s)
+			print s; sys.stdout.flush()
+
 
 		if (';' in str(s)):
 			whole_and_frac = string.split(s, ";")
@@ -74,6 +82,7 @@ class Sexagesimal:
 
 
 
+
 	def to_decimal(self):
 		number_in_decimal = self.whole
 		fracs = self.parts
@@ -122,6 +131,10 @@ class Sexagesimal:
 			elif (places == 1):
 				s += str(x)
 			places -= 1
+
+		print "string func"; sys.stdout.flush()
+		if self.unary == 'crd':
+			s = "<small>crd</small>(" + s + ")"
 		return s	
 	
 	def __add__(self, b):
@@ -225,7 +238,21 @@ class Sexagesimal:
 		elif self.to_decimal() == b.to_decimal():
 			return True
 
-	## TODO: Overwrite the comparison operators and replace usage of to_deciamal in comparators
+	def de_unarize(self):
+		if self.unary == 'crd':
+			self.unary = ''
+			print 'unary = ""'; sys.stdout.flush()
+			result = 2 * math.sin(math.radians(self.to_decimal()/2))
+			print result; sys.stdout.flush()			
+			try: 
+				print "ABC"; sys.stdout.flush()
+				self = Sexagesimal(result)
+			except Exception as e:
+				print "There was some trouble in crd"
+				print e
+
+			print 'Deunarized: ' + str(self); sys.stdout.flush()
+		return self
 
 	def trim(self, places):
 		if (len(self.parts) > places):

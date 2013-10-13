@@ -5,13 +5,6 @@ from calculator import *
 app = Flask(__name__)
 app.debug = True
 
-warning = '''
-			Multiplication and division calculations are
-			conducted by first converting the number to decimal, performing
-			the multiplcation and converting back. This is not completely
-			accurate. All numbers are trimed at six places.
-		  '''
-
 @app.route('/', methods = ['GET','POST'])
 def evaluate_query():
 	error = ''
@@ -23,8 +16,7 @@ def evaluate_query():
 	elif request.method == 'POST':
 		# If method = Post, parse the query
 		calc = Calculator()
-		query_list, e = calc.parse_query(request.form['query'])
-		error += e + "<br/><br/>"
+		query_list, error = calc.parse_query(request.form['query'])	
 		try:
 			formatted_query = format_query_list(query_list)
 		except Exception as e:
@@ -36,6 +28,25 @@ def evaluate_query():
 
 		
 		steps = []; result = ''
+		steps.append(Markup(format_query_list(query_list)))
+
+		ql2 = []
+		for x in query_list:
+			try:
+				if x.unary != '':
+					print str(x)
+					ql2.append(x.de_unarize())
+					print str(x) + ' w/ unary'
+				else:
+					ql2.append(x)
+			except:
+				ql2.append(x)
+
+		query_list = ql2
+		print str(query_list[0]);sys.stdout.flush()
+	
+		steps.append(Markup(format_query_list(query_list)))
+		
 		while True:	
 			try:
 				if (len(query_list) == 1):
@@ -78,7 +89,7 @@ def evaluate_query():
 				break
 
 		if (error==''): 
-			return render_template('pt.html', steps=steps, result=Markup(result), warning='')
+			return render_template('pt.html', steps=steps, query=Markup(formatted_query), result=Markup(result), warning='')
 		else:
 			return render_template('pt.html', result=result, error=Markup(error))
 

@@ -32,7 +32,10 @@
 	{% if warning %}
 		<div class="warning_header"><span class="header">WARNING</span></div>
 		<div class="warning">
-			{{ warning}}
+			Multiplication and division calculations are
+			conducted by first converting the number to decimal, performing
+			the multiplcation and converting back. This is not completely
+			accurate. All numbers are trimed at six places.
 		</div>
 	{% endif %}
 
