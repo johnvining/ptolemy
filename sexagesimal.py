@@ -1,12 +1,101 @@
 import string, math, sys, re
 
-# TODO: Move this somewhere better:
 max_places = 3
+
+class Expression:
+	# Regarding multiple constructors:
+	# http://stackoverflow.com/questions/682504/
+	def __init__(self, pieces):
+		self.pieces = pieces
+		self.unary = None
+
+	@classmethod
+	def from_string(cls, query):
+		# convert string to list of strings
+		error = ''
+		query = re.sub(r'\/',':', query)
+		re_only_alphanumeric_and_operators = re.compile(r'[^\w\*\+\-\/\:\^\;\,\.]')
+		if re_only_alphanumeric_and_operators.search(query) is not None:
+			error = "There was a problem with the query: " + str(query) + "<br/><small><small>This query contains characters that are not letters, numbers or operators.</small></small>"
+		
+		operators_as_strings = re.compile(r'[\*\+\-\:\^]')
+		q = ''; z_l = ''
+		for z in query:
+			# IF it's a minus sign AND
+			#  It's the first character OR
+			#  It comes after another operator
+			# THEN: Replace w/ ~
+
+			if z == "-" and (operators_as_strings.search(z_l) is not None or z_l == ''):
+				q += "~"
+			else:
+				q += z
+			z_l = z
+		query = q
+
+		raw_query_expression = re.split('([\*\+\-\:\^])', query)
+		q = []; parenthetical = ''; level = 0
+		for z in raw_query_expression:
+			if '(' in str(z):
+				if level == 0:
+					parenthetical += z[1:]
+				else:
+					parenthetical += z
+				level += 1
+			elif ')' in str(z):
+				level -= z.count(')')
+				if level == 0:
+					parenthetical += z[:-1]
+					q.append(Expression.from_string(parenthetical))
+					parenthetical = ''
+				else:
+					parenthetical += z
+			elif level != 0:
+				parenthetical += z
+			else:
+				try:
+					q.append(Sexagesimal(z))
+				except Exception as e:
+					# # Anything that cannot be sexagesimalized is considered
+					# # an operator. This will change with unary operators.
+					# print "could not sexagesimalize " + str(x) + str(e); sys.stdout.flush()
+					q.append(z)
+		return cls(q)
+
+	def to_html(query_expression):
+		html = ''; end_super = False
+		for x in query_expression.pieces:
+			if (x == '^'):
+				html += '<sup>'
+				end_super = True
+			elif (end_super):
+				html += str(x) + '</sup>'
+				end_super = False
+			elif (x == '+'):
+				html += ' <b>+</b> '
+			elif (x == '*'):
+				html += ' &times; '
+			elif (x == ':'):
+				html += ' <b>:</b> '
+			elif (x == '-'):
+				html += ' <b>&ndash;</b> '
+			else:
+				html += str(x)
+				print "HTML OF X: " + str(x); sys.stdout.flush()
+		return html
+
+	def __str__(self):
+		stringy = '('
+		for x in self.pieces:
+			stringy += str(x)
+		stringy += ")"
+		return stringy
 
 class Sexagesimal:
 
 # 	A number is made of:
 # 	* negative: True or False
+# 	* unary: an attached unary operator like crd or sin or tan or sqrt
 # 	* whole: the whole-number portion of the number, stored as integer
 # 	* parts: the parts of '1;30,15' are [30,15], stored as a list of integers
 	def __init__(self, s): 
@@ -17,14 +106,15 @@ class Sexagesimal:
 			s = re.sub(r'\~','-', s)
 		except Exception, e:
 			pass
-
-		self.unary = ''
+		
 		# Decide if there is a unary operator attached
 		if 'crd' in str(s):
 			self.unary = 'crd'
 			s = re.sub(r'[a-zA-Z]+','', s)
 			print s; sys.stdout.flush()
-
+		else:
+			self.unary = None
+		
 
 		if (';' in str(s)):
 			whole_and_frac = string.split(s, ";")
@@ -63,9 +153,7 @@ class Sexagesimal:
 				if (d * 60 < 1):
 					break
 
-		elif( s == ''):
-			pass
-
+		# Is it a whole number, garbage?
 		else:
 			# Trying to see if it's a whole number
 			try:
@@ -80,10 +168,7 @@ class Sexagesimal:
 			except Exception as e:	
 				raise Exception('Cannot Sexagesimalize \'' + str(s) + '\'<br/><small>' + str(e) + "</small>")
 
-
-
-
-	def to_decimal(self):
+	def as_decimal(self):
 		number_in_decimal = self.whole
 		fracs = self.parts
 		y = 1
@@ -131,8 +216,6 @@ class Sexagesimal:
 			elif (places == 1):
 				s += str(x)
 			places -= 1
-
-		print "string func"; sys.stdout.flush()
 		if self.unary == 'crd':
 			s = "<small>crd</small>(" + s + ")"
 		return s	
@@ -174,7 +257,7 @@ class Sexagesimal:
 			return - (abs(a) + abs(b))
 		elif (b.negative == True):
 			return abs(a) + abs(b)
-		elif (b.to_decimal() > a.to_decimal()):
+		elif (b.as_decimal() > a.as_decimal()):
 			return - (b - a)
 		else:
 			places = max(len(a.parts), len(b.parts))
@@ -208,53 +291,47 @@ class Sexagesimal:
 
 	def __mul__(self, b):
 		a = self
-		return Sexagesimal(a.to_decimal() * b.to_decimal())
+		return Sexagesimal(a.as_decimal() * b.as_decimal())
 
 	def __div__(self, b):
 		a = self
-		return Sexagesimal(a.to_decimal() / b.to_decimal())
+		return Sexagesimal(a.as_decimal() / b.as_decimal())
 
 	def __pow__(self, b):
 		a = self
-		return Sexagesimal(a.to_decimal() ** b.to_decimal())
+		return Sexagesimal(a.as_decimal() ** b.as_decimal())
 
 	def __cmp__(self, b):
-		a = self.to_decimal()
+		a = self.as_decimal()
 		if type(b) != float and type(b) != int:
-			b = b.to_decimal()
-		
-		if a > b:
-			return 1
-		elif a == b:
-			return 0
-		elif a < b:
-			return -1
+			b = b.as_decimal()
+
+		if a > b:    return 1
+		elif a == b: return 0
+		elif a < b:  return -1
 
 	def __eq__(self, b):
-		if type(b) == unicode or type(b) == str:
-			return False
-		elif type(b) == float or type(b) == int:
-			return self.to_decimal() == b
-		elif self.to_decimal() == b.to_decimal():
-			return True
+		if type(b) == unicode or type(b) == str:  return False
+		elif type(b) == float or type(b) == int:  return self.as_decimal() == b
+		elif self.as_decimal() == b.as_decimal(): return True
 
 	def de_unarize(self):
 		if self.unary == 'crd':
 			self.unary = ''
 			print 'unary = ""'; sys.stdout.flush()
-			result = 2 * math.sin(math.radians(self.to_decimal()/2))
+			result = 2 * math.sin(math.radians(self.as_decimal()/2))
 			print result; sys.stdout.flush()			
 			try: 
-				print "ABC"; sys.stdout.flush()
 				self = Sexagesimal(result)
 			except Exception as e:
-				print "There was some trouble in crd"
-				print e
-
-			print 'Deunarized: ' + str(self); sys.stdout.flush()
+				raise Exception(str(e))
 		return self
 
 	def trim(self, places):
 		if (len(self.parts) > places):
 			self.parts = self.parts[0:places]
 		return self
+
+
+# z = Expression.from_string('2;1--2;1+(1/2+(3-(4-5)-6))')
+# print z
