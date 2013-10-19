@@ -46,67 +46,68 @@ class Calculator:
 			except:
 				# Anything that cannot be sexagesimalized is considered
 				# an operator. This will change with unary operators.
-				print "could not sexagesimalize" + str(x); sys.stdout.flush()
 				query_expression.append(x)
 
 		return query_expression, error
 
 	def evaluate_expression(self, expression):
-		print "evaluate_expression(" + str(expression) + ")"
-
 		steps = []; error = ''; query_expression = expression.pieces; result = 100000
 
 		# Check for expressions within the expression, evaluate those
-		expression_list_copy = []
+		expression_list_copy = []; c = 0
 		for x in query_expression:
 			if isinstance(x, Expression):
 				result_from_parenthetical, steps_for_parenthetical = self.evaluate_expression(x)
 				expression_list_copy.append(result_from_parenthetical)
-				for x in steps_for_parenthetical:
-					steps.append(Markup(Expression(x).to_html()))
+				beginning_string = Expression(query_expression[:c]).to_html()
+				end_string = Expression(query_expression[c+1:]).to_html()
+				steps.append(Markup(beginning_string+"("+x.to_html()+")"+end_string))
+
+				for y in steps_for_parenthetical:
+					steps.append(Markup(beginning_string + "(" + Expression(y).to_html() + ")" + end_string))
 			else:
 				expression_list_copy.append(x)
+			c += 1	
 		query_expression = expression_list_copy
-		print '   made a pass for sub expressions'
 
 
 		# TODO: Check for Unaries, evaluate those
 		
 		# General order of operations
-		while True:
-			print '    length ' + str(len(query_expression))
-			print '    expres ' + str(query_expression)
+		continuey = True
+		while continuey:
 			try:
 				if (len(query_expression) == 1):
 					# If the query is a single number 
 					result = query_expression[0]
-					break
+					continuey = False
 				elif (len(query_expression) == 3):
 					# If the query has been solved down the last triplet, evaluate and set result
-					result = calc.evaluate(query_expression[0], query_expression[2], query_expression[1])
-					print result
-					break
+					result = self.evaluate(query_expression[0], query_expression[2], query_expression[1])
+					continuey = False
 				else:
 					c = 0; triplets = []; length = len(query_expression) - 2
 					while (c < length):
 						triplets.extend([query_expression[c:c+3]])
 						c = c + 1
-					d = calc.next_to_evaluate(triplets)
-					sub_result = calc.evaluate(query_expression[d], query_expression[d+2], query_expression[d+1])
+					d = self.next_to_evaluate(triplets)
+					sub_result = self.evaluate(query_expression[d], query_expression[d+2], query_expression[d+1])
 					query_expression.pop(d); query_expression.pop(d+1)
 					query_expression[d] = sub_result
 					try:
 						steps.append(Markup(Expression(query_expression).to_html()))
 					except Exception as e:
-						print str(e)
-					print steps; sys.stdout.flush()
+						pass
 			except Exception as e:
 				try:
 					error += '<span class="expression"><center>' + formatted_query + '</center></span><br/>'
+					print error; sys.stdout.flush()
 				except Exception as e_1:
 					error += str(e_1) + "<br/><br/>"
 					error += "There was a problem with the query. Python sez: " + str(e)
-
+					print error; sys.stdout.flush()
+					continuey = False
+				continuey = False
 
 		return result, steps
 
@@ -124,7 +125,6 @@ class Calculator:
 		elif self.order_of_operations == 'LEFT TO RIGHT':
 			return 0
 
-		# Move Evaluate to Main Calculator Section
 	def evaluate(self, a, b, operator):
 		if (operator == "*"): return (a * b).trim(self.trim)
 		elif (operator == "+"): return (a + b).trim(self.trim)
@@ -133,10 +133,3 @@ class Calculator:
 		elif (operator == '^'): return (a ** b).trim(self.trim)
 		else:
 			raise Exception(str(operator) + ' is not a valid operator.')
-
-a = Expression.from_string('1;0+2;0+(5;0*2;0)')
-calc = Calculator()
-resulty, stepy = calc.evaluate_expression(a)
-print resulty
-print stepy
-

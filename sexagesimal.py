@@ -138,7 +138,7 @@ class Sexagesimal:
 				self.negative = False
 			else:
 				self.negative = True 
-
+			
 			i, d = divmod(float(s), 1)
 			self.whole = abs(int(i))
 			
