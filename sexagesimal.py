@@ -81,13 +81,11 @@ class Expression:
 				html += ' <b>&ndash;</b> '
 			else:
 				html += str(x)
-				print "HTML OF X: " + str(x); sys.stdout.flush()
 		return html
 
 	def __str__(self):
 		stringy = '('
-		for x in self.pieces:
-			stringy += str(x)
+		stringy += self.to_html()
 		stringy += ")"
 		return stringy
 
