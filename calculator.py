@@ -65,9 +65,10 @@ class Calculator:
 
 				for y in steps_for_parenthetical:
 					steps.append(Markup(beginning_string + "(" + Expression(y).to_html() + ")" + end_string))
+				steps.append(Markup(beginning_string + str(result_from_parenthetical) + end_string))
 			else:
 				expression_list_copy.append(x)
-			c += 1	
+			c += 1
 		query_expression = expression_list_copy
 
 
