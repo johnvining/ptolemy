@@ -12,6 +12,9 @@ class Expression:
 	@classmethod
 	def from_string(cls, query):
 		# convert string to list of strings
+		print "New Expression from String: " + str(query);sys.stdout.flush()
+
+
 		error = ''
 		query = re.sub(r'\/',':', query)
 		re_only_alphanumeric_and_operators = re.compile(r'[^\w\*\+\-\/\:\^\;\,\.]')
@@ -96,7 +99,8 @@ class Sexagesimal:
 # 	* unary: an attached unary operator like crd or sin or tan or sqrt
 # 	* whole: the whole-number portion of the number, stored as integer
 # 	* parts: the parts of '1;30,15' are [30,15], stored as a list of integers
-	def __init__(self, s): 
+	def __init__(self, s):
+		print "  Create a Sexagesimal from: " + str(s)
 		# Given a Sexagesimal Number as String
 		try:
 			# If you can, change any ~ to -. If it doesn't work,
@@ -109,10 +113,10 @@ class Sexagesimal:
 		if 'crd' in str(s):
 			self.unary = 'crd'
 			s = re.sub(r'[a-zA-Z]+','', s)
-			print s; sys.stdout.flush()
 		else:
 			self.unary = None
 		
+		print "    Unary: " + str(self.unary)
 
 		if (';' in str(s)):
 			whole_and_frac = string.split(s, ";")
@@ -203,8 +207,6 @@ class Sexagesimal:
 			s += ''
 		elif (self.negative == True):
 			s += '-'
-		else:
-			s += '!uns!'
 
 		s  += str(self.whole) + ";"
 		places = len(self.parts)
@@ -214,8 +216,11 @@ class Sexagesimal:
 			elif (places == 1):
 				s += str(x)
 			places -= 1
+
+		print "To String, Unary: " + str(self.unary); sys.stdout.flush()
 		if self.unary == 'crd':
 			s = "<small>crd</small>(" + s + ")"
+		
 		return s	
 	
 	def __add__(self, b):
@@ -314,16 +319,21 @@ class Sexagesimal:
 		elif self.as_decimal() == b.as_decimal(): return True
 
 	def de_unarize(self):
+		a = self
 		if self.unary == 'crd':
-			self.unary = ''
-			print 'unary = ""'; sys.stdout.flush()
-			result = 2 * math.sin(math.radians(self.as_decimal()/2))
-			print result; sys.stdout.flush()			
+			result = 2 * math.sin(math.radians(self.as_decimal()/2))			
 			try: 
-				self = Sexagesimal(result)
+				a = Sexagesimal(result)
 			except Exception as e:
+				print "There was an error: " + str(e);sys.stdout.flush()
 				raise Exception(str(e))
-		return self
+		return a
+
+	def has_unary(self):
+		if self.unary != "":
+			return True
+		else:
+			return False
 
 	def trim(self, places):
 		if (len(self.parts) > places):

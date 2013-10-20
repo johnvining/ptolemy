@@ -54,25 +54,40 @@ class Calculator:
 		steps = []; error = ''; query_expression = expression.pieces; result = 100000
 
 		# Check for expressions within the expression, evaluate those
-		expression_list_copy = []; c = 0
+		query_expression_temp = []; c = 0
 		for x in query_expression:
 			if isinstance(x, Expression):
 				result_from_parenthetical, steps_for_parenthetical = self.evaluate_expression(x)
-				expression_list_copy.append(result_from_parenthetical)
+				query_expression_temp.append(result_from_parenthetical)
 				beginning_string = Expression(query_expression[:c]).to_html()
 				end_string = Expression(query_expression[c+1:]).to_html()
-				steps.append(Markup(beginning_string+"("+x.to_html()+")"+end_string))
 
+				steps.append(Markup(beginning_string+"("+x.to_html()+")"+end_string))
 				for y in steps_for_parenthetical:
 					steps.append(Markup(beginning_string + "(" + Expression(y).to_html() + ")" + end_string))
 				steps.append(Markup(beginning_string + str(result_from_parenthetical) + end_string))
+			
 			else:
-				expression_list_copy.append(x)
+				query_expression_temp.append(x)
 			c += 1
-		query_expression = expression_list_copy
+		query_expression = query_expression_temp
+
+		# And now, for Unary Operators
+		query_expression_temp = []; c = 0
+		for x in query_expression:
+			if isinstance(x, Sexagesimal) and x.has_unary():
+				x_un_unarized = x.de_unarize()
+				print x_un_unarized; sys.stdout.flush()
+				query_expression_temp.append(x_un_unarized)
+				beginning_string = Expression(query_expression_temp[:c]).to_html()
+				end_string = Expression(query_expression[c+1:]).to_html()
+				steps.append(Markup(beginning_string+str(x_un_unarized)+end_string))
+			else:
+				query_expression_temp.append(x)
+			c += 1
+		query_expression = query_expression_temp
 
 
-		# TODO: Check for Unaries, evaluate those
 		
 		# General order of operations
 		continuey = True

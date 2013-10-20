@@ -18,10 +18,13 @@ def evaluate_query():
 		# If method = Post, parse the query
 		calc = Calculator()
 		query_expression = Expression.from_string(request.form['query'])
+		q_e_html = query_expression.to_html()
+		
+		# TODO: The following is destructive and should not be.
 		result, steps = calc.evaluate_expression(query_expression)
-			
+		
 		if (error==''): 
-			return render_template('pt.html', steps=steps, query=Markup(query_expression.to_html()), result=Markup(result), warning='')
+			return render_template('pt.html', steps=steps, query=Markup(q_e_html), result=Markup(result), warning='')
 		else:
 			return render_template('pt.html', result=result, error=Markup(error))
 
