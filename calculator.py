@@ -1,6 +1,5 @@
 import re
 from sexagesimal import *
-from flask import Markup
 
 class Calculator:
 	def __init__(self, order_of_operations='PEMDAS', trim=6):
@@ -58,14 +57,14 @@ class Calculator:
 		for x in query_expression:
 			if isinstance(x, Expression):
 				result_from_parenthetical, steps_for_parenthetical = self.evaluate_expression(x)
+				beginning_string = Expression(query_expression_temp).to_html()
 				query_expression_temp.append(result_from_parenthetical)
-				beginning_string = Expression(query_expression[:c]).to_html()
 				end_string = Expression(query_expression[c+1:]).to_html()
 
-				steps.append(Markup(beginning_string+"("+x.to_html()+")"+end_string))
+				l.l('  STEPS IN PARENS' + str(steps_for_parenthetical))
 				for y in steps_for_parenthetical:
-					steps.append(Markup(beginning_string + "(" + Expression(y).to_html() + ")" + end_string))
-				steps.append(Markup(beginning_string + str(result_from_parenthetical) + end_string))
+					steps.append(beginning_string + "(" + y + ")" + end_string)
+				steps.append(beginning_string + result_from_parenthetical.to_html() + end_string)
 			
 			else:
 				query_expression_temp.append(x)
@@ -81,7 +80,7 @@ class Calculator:
 				query_expression_temp.append(x_un_unarized)
 				beginning_string = Expression(query_expression_temp[:c]).to_html()
 				end_string = Expression(query_expression[c+1:]).to_html()
-				steps.append(Markup(beginning_string+str(x_un_unarized)+end_string))
+				steps.append(beginning_string+x_un_unarized.to_html()+end_string)
 			else:
 				query_expression_temp.append(x)
 			c += 1
@@ -111,7 +110,7 @@ class Calculator:
 					query_expression.pop(d); query_expression.pop(d+1)
 					query_expression[d] = sub_result
 					try:
-						steps.append(Markup(Expression(query_expression).to_html()))
+						steps.append(Expression(query_expression).to_html())
 					except Exception as e:
 						pass
 			except Exception as e:

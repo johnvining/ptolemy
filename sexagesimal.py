@@ -1,7 +1,9 @@
 import string, math, sys, re
+from utils import Logger
+from flask import Markup
 
 max_places = 3
-
+l = Logger()
 class Expression:
 	# Regarding multiple constructors:
 	# http://stackoverflow.com/questions/682504/
@@ -65,9 +67,9 @@ class Expression:
 					q.append(z)
 		return cls(q)
 
-	def to_html(query_expression):
+	def to_html(self):
 		html = ''; end_super = False
-		for x in query_expression.pieces:
+		for x in self.pieces:
 			if (x == '^'):
 				html += '<sup>'
 				end_super = True
@@ -82,15 +84,41 @@ class Expression:
 				html += ' <b>:</b> '
 			elif (x == '-'):
 				html += ' <b>&ndash;</b> '
+			elif isinstance(x, Expression):
+				# Since the rest of `html` is a string and not a Markup
+				# object, but to_html() returns an object, bring it back to
+				# a string.
+				html += '(' + str(x.to_html()) + ')'
 			else:
-				html += str(x)
-		return html
+				try:
+					# Since the rest of `html` is a string and not a Markup
+					# object, but to_html() returns an object, bring it back to
+					# a string.
+					html += str(x.to_html())
+				except:
+					html += str(x)
+		return Markup(html)
 
 	def __str__(self):
-		stringy = '('
-		stringy += self.to_html()
-		stringy += ")"
-		return stringy
+		s =''
+		for x in self.pieces:
+			if (x == '^'):
+				s += '^'
+			elif (x == '+'):
+				s += ' + '
+			elif (x == '*'):
+				s += ' * '
+			elif (x == ':'):
+				s += ' : '
+			elif (x == '-'):
+				s += ' - '
+			else:
+				if isinstance(x, Expression):
+					s += '(' + str(x) + ')'
+					l.l('is instance: ' + str(s))
+				else:
+					s += str(x)
+		return s
 
 class Sexagesimal:
 
@@ -115,8 +143,6 @@ class Sexagesimal:
 			s = re.sub(r'[a-zA-Z]+','', s)
 		else:
 			self.unary = None
-		
-		print "    Unary: " + str(self.unary)
 
 		if (';' in str(s)):
 			whole_and_frac = string.split(s, ";")
@@ -217,16 +243,38 @@ class Sexagesimal:
 				s += str(x)
 			places -= 1
 
-		print "To String, Unary: " + str(self.unary); sys.stdout.flush()
+		if self.unary == 'crd':
+			s = "crd(" + s + ")"
+		
+		return s
+
+	# TODO: Rewrite this function to rely on __str__ above
+	def to_html(self):
+		s = ''
+		self.trim(max_places)
+		if (self.negative == False):
+			s += ''
+		elif (self.negative == True):
+			s += '-'
+
+		s  += str(self.whole) + ";"
+		places = len(self.parts)
+		for x in self.parts:
+			if (places > 1):
+				s += str(x) + ","
+			elif (places == 1):
+				s += str(x)
+			places -= 1
+
 		if self.unary == 'crd':
 			s = "<small>crd</small>(" + s + ")"
-		
-		return s	
-	
+		# Returns a Markup Object
+		return Markup(s)	
+
 	def __add__(self, b):
 		a = self
+		
 		# Is this actually a subtraction problem?
-
 		if (a.negative == True and b.negative == True):
 			return -(abs(a) + abs(b))
 		elif (a.negative == True):
@@ -325,12 +373,12 @@ class Sexagesimal:
 			try: 
 				a = Sexagesimal(result)
 			except Exception as e:
-				print "There was an error: " + str(e);sys.stdout.flush()
+				l.l("There was an error: " + str(e), importance='error')
 				raise Exception(str(e))
 		return a
 
 	def has_unary(self):
-		if self.unary != "":
+		if self.unary is not None:
 			return True
 		else:
 			return False
@@ -341,5 +389,5 @@ class Sexagesimal:
 		return self
 
 
-# z = Expression.from_string('2;1--2;1+(1/2+(3-(4-5)-6))')
-# print z
+z = Expression.from_string('2;1--2;1+(1/2+(3-(4-5)-6))')
+print z.to_html()

@@ -2,6 +2,7 @@ import os, sys, string, re
 from flask import Flask, url_for, render_template, request, Markup
 from calculator import *
 from sexagesimal import Expression
+from utils import Logger
 
 app = Flask(__name__)
 app.debug = True
@@ -9,12 +10,15 @@ app.debug = True
 @app.route('/', methods = ['GET','POST'])
 def evaluate_query():
 	error = ''
+	l = Logger()
 
 	if request.method == 'GET':
+		l.l('request.method = GET')
 		# If there is no query, display the basic page with instructions
 		return render_template('pt.html', instructions=False)
 	
 	elif request.method == 'POST':
+		l.l('request.method = POST')
 		# If method = Post, parse the query
 		calc = Calculator()
 		query_expression = Expression.from_string(request.form['query'])
@@ -24,7 +28,7 @@ def evaluate_query():
 		result, steps = calc.evaluate_expression(query_expression)
 		
 		if (error==''): 
-			return render_template('pt.html', steps=steps, query=Markup(q_e_html), result=Markup(result), warning='')
+			return render_template('pt.html', steps=steps, query=q_e_html, result=str(result), warning='')
 		else:
 			return render_template('pt.html', result=result, error=Markup(error))
 
@@ -34,10 +38,6 @@ def evaluate_query():
 def create_alert(kind, text):
 	html = '<div class="%s">%s</div>' % (kind, text)
 	return html
-
-def print_error(s):
-	print s
-	sys.stdout.flush()
 
 def print_list(listy):
 	html = "<ul>"
