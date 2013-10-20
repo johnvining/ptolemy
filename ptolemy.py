@@ -6,11 +6,12 @@ from utils import Logger
 
 app = Flask(__name__)
 app.debug = True
+l = Logger('ptol')
 
 @app.route('/', methods = ['GET','POST'])
 def evaluate_query():
 	error = ''
-	l = Logger()
+	
 
 	if request.method == 'GET':
 		l.l('request.method = GET')
@@ -31,17 +32,3 @@ def evaluate_query():
 			return render_template('pt.html', steps=steps, query=q_e_html, result=str(result), warning='')
 		else:
 			return render_template('pt.html', result=result, error=Markup(error))
-
-
-
-
-def create_alert(kind, text):
-	html = '<div class="%s">%s</div>' % (kind, text)
-	return html
-
-def print_list(listy):
-	html = "<ul>"
-	for x in listy:
-		html += '<li>%s</li>' % str(x)
-	html += '</ul>'
-	return html

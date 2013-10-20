@@ -1,12 +1,12 @@
 import string, math, sys, re
-from utils import Logger
 from flask import Markup
 
 max_places = 3
-l = Logger()
+
+from utils import Logger
+l = Logger('sexa')
+
 class Expression:
-	# Regarding multiple constructors:
-	# http://stackoverflow.com/questions/682504/
 	def __init__(self, pieces):
 		self.pieces = pieces
 		self.unary = None
@@ -14,8 +14,7 @@ class Expression:
 	@classmethod
 	def from_string(cls, query):
 		# convert string to list of strings
-		print "New Expression from String: " + str(query);sys.stdout.flush()
-
+		l.l('New Expression from String: ' + str(query))
 
 		error = ''
 		query = re.sub(r'\/',':', query)
@@ -39,32 +38,32 @@ class Expression:
 		query = q
 
 		raw_query_expression = re.split('([\*\+\-\:\^])', query)
-		q = []; parenthetical = ''; level = 0
+		q = []; sub_expression = ''; level = 0
 		for z in raw_query_expression:
 			if '(' in str(z):
 				if level == 0:
-					parenthetical += z[1:]
+					sub_expression += z[1:]
 				else:
-					parenthetical += z
+					sub_expression += z
 				level += 1
 			elif ')' in str(z):
 				level -= z.count(')')
 				if level == 0:
-					parenthetical += z[:-1]
-					q.append(Expression.from_string(parenthetical))
-					parenthetical = ''
+					sub_expression += z[:-1]
+					q.append(Expression.from_string(sub_expression))
+					sub_expression = ''
 				else:
-					parenthetical += z
+					sub_expression += z
 			elif level != 0:
-				parenthetical += z
+				sub_expression += z
 			else:
 				try:
 					q.append(Sexagesimal(z))
 				except Exception as e:
-					# # Anything that cannot be sexagesimalized is considered
-					# # an operator. This will change with unary operators.
-					# print "could not sexagesimalize " + str(x) + str(e); sys.stdout.flush()
+					# Anything that cannot be sexagesimalized is considered
+					# an operator.
 					q.append(z)
+					l.v('Could not sexagesimalize ' + str(z))
 		return cls(q)
 
 	def to_html(self):
@@ -128,7 +127,7 @@ class Sexagesimal:
 # 	* whole: the whole-number portion of the number, stored as integer
 # 	* parts: the parts of '1;30,15' are [30,15], stored as a list of integers
 	def __init__(self, s):
-		print "  Create a Sexagesimal from: " + str(s)
+		l.v("Create a Sexagesimal from: " + str(s))
 		# Given a Sexagesimal Number as String
 		try:
 			# If you can, change any ~ to -. If it doesn't work,
@@ -211,20 +210,27 @@ class Sexagesimal:
 
 		return number_in_decimal
 
-	def __neg__(self):
-		a = Sexagesimal(str(self)) # TODO: Better way to copy?
-		if (self.negative == True):
-			a.negative = False
-		elif (self.negative == False):
-			a.negative = True
-		else:
-			a.negative = True
+	def de_unarize(self):
+		a = self
+		if self.unary == 'crd':
+			result = 2 * math.sin(math.radians(self.as_decimal()/2))			
+			try: 
+				a = Sexagesimal(result)
+			except Exception as e:
+				l.e("There was an error: " + str(e))
+				raise Exception(str(e))
 		return a
 
-	def __abs__(self):
-		a = Sexagesimal(str(self)) # TODO: Better way to copy?
-		a.negative = False
-		return a
+	def has_unary(self):
+		if self.unary is not None:
+			return True
+		else:
+			return False
+
+	def trim(self, places):
+		if (len(self.parts) > places):
+			self.parts = self.parts[0:places]
+		return self
 
 	def __str__(self):
 		s = ''
@@ -269,7 +275,22 @@ class Sexagesimal:
 		if self.unary == 'crd':
 			s = "<small>crd</small>(" + s + ")"
 		# Returns a Markup Object
-		return Markup(s)	
+		return Markup(s)
+
+	def __neg__(self):
+		a = Sexagesimal(str(self)) # TODO: Better way to copy?
+		if (self.negative == True):
+			a.negative = False
+		elif (self.negative == False):
+			a.negative = True
+		else:
+			a.negative = True
+		return a
+
+	def __abs__(self):
+		a = Sexagesimal(str(self)) # TODO: Better way to copy?
+		a.negative = False
+		return a	
 
 	def __add__(self, b):
 		a = self
@@ -365,29 +386,3 @@ class Sexagesimal:
 		if type(b) == unicode or type(b) == str:  return False
 		elif type(b) == float or type(b) == int:  return self.as_decimal() == b
 		elif self.as_decimal() == b.as_decimal(): return True
-
-	def de_unarize(self):
-		a = self
-		if self.unary == 'crd':
-			result = 2 * math.sin(math.radians(self.as_decimal()/2))			
-			try: 
-				a = Sexagesimal(result)
-			except Exception as e:
-				l.l("There was an error: " + str(e), importance='error')
-				raise Exception(str(e))
-		return a
-
-	def has_unary(self):
-		if self.unary is not None:
-			return True
-		else:
-			return False
-
-	def trim(self, places):
-		if (len(self.parts) > places):
-			self.parts = self.parts[0:places]
-		return self
-
-
-z = Expression.from_string('2;1--2;1+(1/2+(3-(4-5)-6))')
-print z.to_html()
