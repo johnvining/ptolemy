@@ -50,7 +50,8 @@ class Expression:
 				level -= z.count(')')
 				if level == 0:
 					sub_expression += z[:-1]
-					q.append(Expression.from_string(sub_expression))
+					expr, ignore = Expression.from_string(sub_expression)
+					q.append(expr)
 					sub_expression = ''
 				else:
 					sub_expression += z
