@@ -86,7 +86,8 @@ div.error
 	padding: 13px;
 	margin: 15px;
 	margin-top: 0px; 
-	border: 2px solid #cc6666;}
+	border: 2px solid #cc6666;
+	font-size: 16px;}
 
 div.error_header
 	{color: white;

@@ -3,7 +3,7 @@ from flask import Markup
 
 max_places = 3
 
-from utils import Logger
+from utils import Logger, Error
 l = Logger('sexa')
 
 class Expression:
@@ -16,12 +16,12 @@ class Expression:
 		# convert string to list of strings
 		l.l('New Expression from String: ' + str(query))
 
-		error = ''
+		errors = []
 		query = re.sub(r'\/',':', query)
 		re_only_alphanumeric_and_operators = re.compile(r'[^\w\*\+\-\/\:\^\;\,\.]')
 		if re_only_alphanumeric_and_operators.search(query) is not None:
-			error = "There was a problem with the query: " + str(query) + "<br/><small><small>This query contains characters that are not letters, numbers or operators.</small></small>"
-		
+			errors.append(Error('This query contains characters that are not letters, numbers or operators.', None, query))
+			
 		operators_as_strings = re.compile(r'[\*\+\-\:\^]')
 		q = ''; z_l = ''
 		for z in query:
@@ -64,7 +64,12 @@ class Expression:
 					# an operator.
 					q.append(z)
 					l.v('Could not sexagesimalize ' + str(z))
-		return cls(q)
+
+		if level != 0:
+			errors.append(Error('Please close all parentheses!',None,None))
+			level = 0
+
+		return cls(q), errors
 
 	def to_html(self):
 		html = ''; end_super = False
@@ -96,6 +101,7 @@ class Expression:
 					html += str(x.to_html())
 				except:
 					html += str(x)
+
 		return Markup(html)
 
 	def __str__(self):

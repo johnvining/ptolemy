@@ -12,18 +12,17 @@
 	<small><small>Sexagesimal Calculator</small></small></div>   
 
 	<!-- ERROR -->
-	{% if error %}
-		<div class="error_header"><span class="header">ERROR</span></div>
-		<div class="error">
-			{{ error }}
-		</div>
-	{% endif %}
+	{% if errors %}{% for error in errors%}
+		<div class="error_header">ERROR</div>
+		<div class="error">{{ error.to_html() }}</div>
+	{% endfor %}{% endif %}
+
 
 	<!-- INSTRUCTIONS -->
 	{% if instructions %}
 		<div class="controls_header">INSTRUCTIONS</div>
 		<div class="controls">
-			Please enter a query below. Valid input includes sexagesimal numbers (3;30,5), decimal numbers (1.25), and the five basic operators: +, -, ^, *, and : for division.
+			Please enter a query below. Valid input includes sexagesimal numbers (<span class="expression">3;30,5</span>), decimal numbers (<span class="expression">1.25</span>), and the five basic operators: <span class="expression">+</span>, <span class="expression">-</span>, <span class="expression">^</span>, <span class="expression">*</span>, and <span class="expression">:</span> or <span class="expression">/</span> for division.
 		</div>
 	{% endif %}
 

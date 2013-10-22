@@ -1,6 +1,6 @@
 import re
 from sexagesimal import *
-from utils import Logger
+from utils import Logger, Error
 l = Logger('calc')
 
 class Calculator:
@@ -13,7 +13,7 @@ class Calculator:
 		l.l('New Calculator: ' + self.order_of_operations + ", " + str(self.trim))
 
 	def evaluate_expression(self, expression):
-		steps = []; error = ''; query_expression = expression.pieces; result = 100000
+		steps = []; errors = []; query_expression = expression.pieces
 
 		# Check for expressions within the expression, evaluate those
 		query_expression_temp = []; c = 0
@@ -76,17 +76,17 @@ class Calculator:
 					except Exception as e:
 						l.e('Could not append step.')
 						l.e('   ' + str(e))
+						errors.append(Error('Could not append step.', python_error=e))
 			except Exception as e:
-				try:
-					error += '<span class="expression"><center>' + formatted_query + '</center></span><br/>'
-				except Exception as e_1:
-					error += str(e_1) + "<br/><br/>"
-					error += "There was a problem with the query. Python sez: " + str(e)
-					l.e('Problem with query. Py: ' + str(e))
+				errors.append(Error('There was a problem with the query:', expression, e))
+				l.e('Problem with query. Py: ' + str(e))
 				cont = False
 
-		return result, steps
-
+		try:
+			return result, steps, errors
+		except:
+			# errors.append(Error('There was no result.'))
+			return None, steps, errors
 
 	def next_to_evaluate(self, triplets):
 		l.v('next_to_evaluate')
