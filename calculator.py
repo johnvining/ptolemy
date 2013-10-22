@@ -10,21 +10,22 @@ class Calculator:
 		elif order_of_operations == 'LEFT TO RIGHT':
 			self.order_of_operations = 'LEFT TO RIGHT'
 		self.trim = trim
-		l.l('New Calculator: ' + self.order_of_operations + ", " + str(self.trim))
+		l.v('New Calculator: ' + self.order_of_operations + ", " + str(self.trim))
 
 	def evaluate_expression(self, expression):
+		l.v('evaluate_expression: ' + str(expression))
 		steps = []; errors = []; query_expression = expression.pieces
 
 		# Check for expressions within the expression, evaluate those
 		query_expression_temp = []; c = 0
 		for x in query_expression:
 			if isinstance(x, Expression):
-				result_from_parenthetical, steps_for_parenthetical = self.evaluate_expression(x)
+				result_from_parenthetical, steps_for_parenthetical, eval_errors = self.evaluate_expression(x)
+				for x in eval_errors: errors.append(x)
 				beginning_string = Expression(query_expression_temp).to_html()
 				query_expression_temp.append(result_from_parenthetical)
 				end_string = Expression(query_expression[c+1:]).to_html()
 
-				l.l('  STEPS IN PARENS' + str(steps_for_parenthetical))
 				for y in steps_for_parenthetical:
 					steps.append(beginning_string + "(" + y + ")" + end_string)
 				steps.append(beginning_string + result_from_parenthetical.to_html() + end_string)
@@ -67,8 +68,11 @@ class Calculator:
 					while (c < length):
 						triplets.extend([query_expression[c:c+3]])
 						c = c + 1
+					
 					d = self.next_to_evaluate(triplets)
+
 					sub_result = self.evaluate(query_expression[d], query_expression[d+2], query_expression[d+1])
+
 					query_expression.pop(d); query_expression.pop(d+1)
 					query_expression[d] = sub_result
 					try:

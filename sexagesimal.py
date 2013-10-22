@@ -18,9 +18,9 @@ class Expression:
 
 		errors = []
 		query = re.sub(r'\/',':', query)
-		re_only_alphanumeric_and_operators = re.compile(r'[^\w\*\+\-\/\:\^\;\,\.]')
+		re_only_alphanumeric_and_operators = re.compile(r'[^\w\*\+\-\/\:\^\;\,\.\(\)]')
 		if re_only_alphanumeric_and_operators.search(query) is not None:
-			errors.append(Error('This query contains characters that are not letters, numbers or operators.', None, query))
+			errors.append(Error('This query contains characters that are not letters, numbers or operators.', query, None))
 			
 		operators_as_strings = re.compile(r'[\*\+\-\:\^]')
 		q = ''; z_l = ''
@@ -37,7 +37,7 @@ class Expression:
 			z_l = z
 		query = q
 
-		raw_query_expression = re.split('([\*\+\-\:\^])', query)
+		raw_query_expression = re.split(r'([\*\+\-\:\^])', query)
 		q = []; sub_expression = ''; level = 0
 		for z in raw_query_expression:
 			if '(' in str(z):
@@ -121,7 +121,6 @@ class Expression:
 			else:
 				if isinstance(x, Expression):
 					s += '(' + str(x) + ')'
-					l.l('is instance: ' + str(s))
 				else:
 					s += str(x)
 		return s
