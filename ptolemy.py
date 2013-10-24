@@ -14,7 +14,7 @@ def evaluate_query():
 	if request.method == 'GET':
 		l.l('request.method = GET')
 		# If there is no query, display the basic page with instructions
-		return render_template('pt.html', instructions=False)
+		return render_template('pt.html', instructions=True)
 	
 	elif request.method == 'POST':
 		l.l('request.method = POST')
