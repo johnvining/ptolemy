@@ -17,6 +17,7 @@ class Expression:
 		l.l('New Expression from String: ' + str(query))
 
 		errors = []
+		query = query.replace(" ", "")
 		query = re.sub(r'\/',':', query)
 		re_only_alphanumeric_and_operators = re.compile(r'[^\w\*\+\-\/\:\^\;\,\.\(\)]')
 		if re_only_alphanumeric_and_operators.search(query) is not None:
