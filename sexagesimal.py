@@ -41,7 +41,11 @@ class Expression:
 		raw_query_expression = re.split(r'([\*\+\-\:\^])', query)
 		q = []; sub_expression = ''; level = 0
 		for z in raw_query_expression:
-			if '(' in str(z):
+			if '(' in str(z) and ')' in str(z) and level == 0:
+				y = z.replace("(","")
+				y = y.replace(")","")
+				q.append(Sexagesimal(y))
+			elif '(' in str(z):
 				if level == 0:
 					sub_expression += z[1:]
 				else:
