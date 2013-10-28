@@ -345,10 +345,8 @@ class Sexagesimal:
 		else:
 			places = max(len(a.parts), len(b.parts))
 			# Create a Blank Result
-			y = '0'
-			for x in range(1, places): y += ',0' 
-			result = Sexagesimal('0;' + y)
-
+			result = Sexagesimal('0;0').pad(places)
+			print result
 			c = places - 1; carry = 0
 			while (c >= 0):
 				x = carry; carry = 0
@@ -371,6 +369,16 @@ class Sexagesimal:
 			else:
 				result.whole = a.whole - b.whole + carry
 			return result
+
+
+	def pad(self, places):
+		# Adds extra zeroes as necessary
+		if len(self.parts) > places:
+			return self
+		else:
+			for x in range(places - len(self.parts)):
+				self.parts.append(0)
+			return self
 
 	def __mul__(self, b):
 		a = self
