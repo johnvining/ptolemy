@@ -18,7 +18,6 @@ def as_n_d(whole, parts):
         n = (n + x) * base
     return n, d
 
-
 def as_w_p(n, d):
     w, r = divmod(n, base ** d)
     c = d - 1
@@ -28,7 +27,6 @@ def as_w_p(n, d):
         p.append(part)
         c -= 1
     return w, p
-
 
 class Expression:
     def __init__(self, pieces):
@@ -109,7 +107,7 @@ class Expression:
         html = ''
         end_super = False
         for x in self.pieces:
-            if isinstance(x, str):
+            if isinstance(x, basestring):
                 if (x == '^'):
                     html += '<sup>'
                     end_super = True
@@ -155,7 +153,6 @@ class Expression:
                 else:
                     s += str(x)
         return s
-
 
 class Sexagesimal:
     def __init__(self, s=None, **kwargs):
@@ -235,15 +232,6 @@ class Sexagesimal:
             self.d = kwargs['d']
             self.unary = None
             self.negative = False
-
-    def match(self, b):
-        places = b.d
-        if self.d < places:
-            change = places - self.d
-            self.n = self.n * (base ** change)
-            self.d += change
-        elif self.d > places:
-            b.match(self)
 
     def __abs__(self):
         a = copy.deepcopy(self)
@@ -381,3 +369,30 @@ class Sexagesimal:
     def trim(self,x):
         # TODO: Write Trim Function
         return self
+
+    def match(self, b):
+        places = b.d
+        if self.d < places:
+            change = places - self.d
+            self.n *= base ** change
+            self.d += change
+        elif self.d > places:
+            b.match(self)
+
+    def __pow__(self, b):
+        # TODO: Write a specific method for whole number powers
+        return Sexagesimal(self.as_decimal() ** b.as_decimal())
+
+    def as_decimal(self):
+        number_in_decimal, fracs = as_w_p(self.n, self.d)
+        y = 1
+        for x in fracs:
+                x = float(x)
+                denom = pow(60, y)
+                number_in_decimal += x/denom
+                y += 1
+
+        if (self.negative):
+                number_in_decimal = number_in_decimal * -1
+
+        return number_in_decimal
