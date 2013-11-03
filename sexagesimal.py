@@ -1,407 +1,383 @@
 import string, math, sys, re
 from flask import Markup
+import copy
 
-max_places = 3
+max_places = 90
+base = 60
 
 from utils import Logger, Error
+
 l = Logger('sexa')
 
+
+def as_n_d(whole, parts):
+    n = base * whole
+    d = 1
+    for x in parts:
+        d += 1
+        n = (n + x) * base
+    return n, d
+
+
+def as_w_p(n, d):
+    w, r = divmod(n, base ** d)
+    c = d - 1
+    p = []
+    for x in range(c):
+        part, r = divmod(r, base ** c)
+        p.append(part)
+        c -= 1
+    return w, p
+
+
 class Expression:
-	def __init__(self, pieces):
-		self.pieces = pieces
-		self.unary = None
+    def __init__(self, pieces):
+        self.pieces = pieces
+        self.unary = None
 
-	@classmethod
-	def from_string(cls, query):
-		# convert string to list of strings
-		l.l('New Expression from String: ' + str(query))
+    @classmethod
+    def from_string(cls, query):
+        # convert string to list of strings
+        l.l('New Expression from String: ' + str(query))
 
-		errors = []
-		query = query.replace(" ", "")
-		query = re.sub(r'\/',':', query)
-		re_only_alphanumeric_and_operators = re.compile(r'[^\w\*\+\-\/\:\^\;\,\.\(\)]')
-		if re_only_alphanumeric_and_operators.search(query) is not None:
-			errors.append(Error('This query contains characters that are not letters, numbers or operators.', query, None))
-			
-		operators_as_strings = re.compile(r'[\*\+\-\:\^]')
-		q = ''; z_l = ''
-		for z in query:
-			# IF it's a minus sign AND
-			#  It's the first character OR
-			#  It comes after another operator
-			# THEN: Replace w/ ~
+        errors = []
+        query = query.replace(" ", "")
+        query = re.sub(r'\/', ':', query)
+        re_only_alphanumeric_and_operators = re.compile(r'[^\w\*\+\-/:\^;,\.\(\)]')
+        if re_only_alphanumeric_and_operators.search(query) is not None:
+            errors.append(
+                Error('This query contains characters that are not letters, numbers or operators.', query, None))
 
-			if z == "-" and (operators_as_strings.search(z_l) is not None or z_l == ''):
-				q += "~"
-			else:
-				q += z
-			z_l = z
-		query = q
+        operators_as_strings = re.compile(r'[\*\+\-\:\^]')
+        q = '';
+        z_l = ''
+        for z in query:
+            # IF it's a minus sign AND
+            #  It's the first character OR
+            #  It comes after another operator
+            # THEN: Replace w/ ~
 
-		raw_query_expression = re.split(r'([\*\+\-\:\^])', query)
-		q = []; sub_expression = ''; level = 0
-		for z in raw_query_expression:
-			if '(' in str(z) and ')' in str(z) and level == 0:
-				y = z.replace("(","")
-				y = y.replace(")","")
-				q.append(Sexagesimal(y))
-			elif '(' in str(z):
-				if level == 0:
-					sub_expression += z[1:]
-				else:
-					sub_expression += z
-				level += 1
-			elif ')' in str(z):
-				level -= z.count(')')
-				if level == 0:
-					sub_expression += z[:-1]
-					expr, ignore = Expression.from_string(sub_expression)
-					q.append(expr)
-					sub_expression = ''
-				else:
-					sub_expression += z
-			elif level != 0:
-				sub_expression += z
-			else:
-				try:
-					q.append(Sexagesimal(z))
-				except Exception as e:
-					# Anything that cannot be sexagesimalized is considered
-					# an operator.
-					q.append(z)
-					l.v('Could not sexagesimalize ' + str(z))
+            if z == "-" and (operators_as_strings.search(z_l) is not None or z_l == ''):
+                q += "~"
+            else:
+                q += z
+            z_l = z
+        query = q
 
-		if level != 0:
-			errors.append(Error('Please close all parentheses!',None,None))
-			level = 0
+        raw_query_expression = re.split(r'([\*\+\-:\^])', query)
+        q = []
+        sub_expression = ''
+        level = 0
+        for z in raw_query_expression:
+            if '(' in str(z) and ')' in str(z) and level == 0:
+                y = z.replace("(", "")
+                y = y.replace(")", "")
+                q.append(Sexagesimal(y))
+            elif '(' in str(z):
+                if level == 0:
+                    sub_expression += z[1:]
+                else:
+                    sub_expression += z
+                level += 1
+            elif ')' in str(z):
+                level -= z.count(')')
+                if level == 0:
+                    sub_expression += z[:-1]
+                    expr, ignore = Expression.from_string(sub_expression)
+                    q.append(expr)
+                    sub_expression = ''
+                else:
+                    sub_expression += z
+            elif level != 0:
+                sub_expression += z
+            else:
+                try:
+                    q.append(Sexagesimal(z))
+                except Exception as e:
+                    # Anything that cannot be sexagesimalized is considered
+                    # an operator.
+                    q.append(z)
+                    l.v('Could not sexagesimalize ' + str(z))
 
-		return cls(q), errors
+        if level != 0:
+            errors.append(Error('Please close all parentheses!', None, None))
+            level = 0
 
-	def to_html(self):
-		html = ''; end_super = False
-		for x in self.pieces:
-			if (x == '^'):
-				html += '<sup>'
-				end_super = True
-			elif (end_super):
-				html += str(x) + '</sup>'
-				end_super = False
-			elif (x == '+'):
-				html += ' <b>+</b> '
-			elif (x == '*'):
-				html += ' &times; '
-			elif (x == ':'):
-				html += ' <b>:</b> '
-			elif (x == '-'):
-				html += ' <b>&ndash;</b> '
-			elif isinstance(x, Expression):
-				# Since the rest of `html` is a string and not a Markup
-				# object, but to_html() returns an object, bring it back to
-				# a string.
-				html += '(' + str(x.to_html()) + ')'
-			else:
-				try:
-					# Since the rest of `html` is a string and not a Markup
-					# object, but to_html() returns an object, bring it back to
-					# a string.
-					html += str(x.to_html())
-				except:
-					html += str(x)
+        return cls(q), errors
 
-		return Markup(html)
+    def to_html(self):
+        html = ''
+        end_super = False
+        for x in self.pieces:
+            if isinstance(x, str):
+                if (x == '^'):
+                    html += '<sup>'
+                    end_super = True
+                elif (end_super):
+                    html += str(x) + '</sup>'
+                    end_super = False
+                elif (x == '+'):
+                    html += ' <b>+</b> '
+                elif (x == '*'):
+                    html += ' &times; '
+                elif (x == ':'):
+                    html += ' <b>:</b> '
+                elif (x == '-'):
+                    html += ' <b>&ndash;</b> '
+            elif isinstance(x, Expression):
+                # Since the rest of `html` is a string and not a Markup
+                # object, but to_html() returns an object, bring it back to
+                # a string.
+                html += '(' + str(x.to_html()) + ')'
+            elif isinstance(x, Sexagesimal):
+                html += str(x.to_html())
+            else:
+                html += str(x)
 
-	def __str__(self):
-		s =''
-		for x in self.pieces:
-			if (x == '^'):
-				s += '^'
-			elif (x == '+'):
-				s += ' + '
-			elif (x == '*'):
-				s += ' * '
-			elif (x == ':'):
-				s += ' : '
-			elif (x == '-'):
-				s += ' - '
-			else:
-				if isinstance(x, Expression):
-					s += '(' + str(x) + ')'
-				else:
-					s += str(x)
-		return s
+        return Markup(html)
+
+    def __str__(self):
+        s = ''
+        for x in self.pieces:
+            if (x == '^'):
+                s += '^'
+            elif (x == '+'):
+                s += ' + '
+            elif (x == '*'):
+                s += ' * '
+            elif (x == ':'):
+                s += ' : '
+            elif (x == '-'):
+                s += ' - '
+            else:
+                if isinstance(x, Expression):
+                    s += '(' + str(x) + ')'
+                else:
+                    s += str(x)
+        return s
+
 
 class Sexagesimal:
+    def __init__(self, s=None, **kwargs):
 
-# 	A number is made of:
-# 	* negative: True or False
-# 	* unary: an attached unary operator like crd or sin or tan or sqrt
-# 	* whole: the whole-number portion of the number, stored as integer
-# 	* parts: the parts of '1;30,15' are [30,15], stored as a list of integers
-	def __init__(self, s):
-		l.v("Create a Sexagesimal from: " + str(s))
-		# Given a Sexagesimal Number as String
-		try:
-			# If you can, change any ~ to -. If it doesn't work,
-			#  it's problably a float.
-			s = re.sub(r'\~','-', s)
-		except Exception, e:
-			pass
-		
-		# Decide if there is a unary operator attached
-		if 'crd' in str(s):
-			self.unary = 'crd'
-			s = re.sub(r'[a-zA-Z]+','', s)
-		else:
-			self.unary = None
+        # Parse from a String
+        if s is not None:
+            # Replace ~ with -
+            try:
+                # If you can, change any ~ to -.
+                s = re.sub(r'\~', '-', s)
+            except:
+                pass
 
-		if (';' in str(s)):
-			whole_and_frac = string.split(s, ";")
-			if ('-' not in str(whole_and_frac[0])):
-				self.negative = False
-			else:
-				self.negative = True
+            # Parse Unary
+            if 'crd' in str(s):
+                self.unary = 'crd'
+                s = re.sub(r'[a-zA-Z]+', '', s)
+            else:
+                self.unary = None
 
-			self.whole = abs(int(whole_and_frac[0]))
-			
-			if (',' in str(whole_and_frac[1])):
-				fracs = string.split(whole_and_frac[1], ",")
-				y = 1
-				self.parts = []
-				for x in fracs:
-					self.parts.extend([int(x)])
-			else:
-				self.parts = [int(whole_and_frac[1])]
+            if (';' in str(s)):
+                whole_and_frac = string.split(s, ";")
+                if ('-' not in str(whole_and_frac[0])):
+                    self.negative = False
+                else:
+                    self.negative = True
 
-		# Given a Decimal Number _as string_
-		elif ('.' in str(s)):
-			if (float(s) >= 0):
-				self.negative = False
-			else:
-				self.negative = True 
-			
-			i, d = divmod(float(s), 1)
-			self.whole = abs(int(i))
-			
-			self.parts = []
-			p = ''
-			x = 0
-			while (x < 3):
-				i,d = divmod(d * 60, 1)
-				self.parts.extend([int(i)])
-				if (d * 60 < 1):
-					break
+                whole = abs(int(whole_and_frac[0]))
+                if (',' in str(whole_and_frac[1])):
+                    fracs = string.split(whole_and_frac[1], ",")
+                    y = 1
+                    parts = []
+                    for x in fracs:
+                        parts.extend([int(x)])
+                else:
+                    parts = [int(whole_and_frac[1])]
+                self.n, self.d = as_n_d(whole, parts)
 
-		# Is it a whole number, garbage?
-		else:
-			# Trying to see if it's a whole number
-			try:
-				if (int(s) >= 0):
-					self.negative = False
-				else:
-					self.negative = True
-				self.whole = abs(int(s))
-				self.parts = [0]
+            elif ('.' in str(s)):
+                if (float(s) >= 0):
+                    self.negative = False
+                else:
+                    self.negative = True
 
-			# Apparently not a whole number
-			except Exception as e:	
-				raise Exception('Cannot Sexagesimalize \'' + str(s) + '\'<br/><small>' + str(e) + "</small>")
+                i, r = divmod(float(s), 1)
+                whole = abs(int(i))
 
-	def as_decimal(self):
-		number_in_decimal = self.whole
-		fracs = self.parts
-		y = 1
-		for x in fracs:
-			x = float(x)
-			denom = pow(60, y)
-			number_in_decimal += x/denom
-			y += 1
+                parts = []
+                x = 0
+                while True:
+                    i, r = divmod(r * base, 1)
+                    parts.extend([int(i)])
+                    # TODO: Rewrite this to better decide
+                    #  when to exist loop.
+                    if (r * (base ** 3) < 0.01):
+                        break
+                self.n, self.d = as_n_d(whole, parts)
 
-		if (self.negative):
-			number_in_decimal = number_in_decimal * -1
+            # Is it a whole number, garbage?
+            else:
+                # Trying to see if it's a whole number
+                try:
+                    if (int(s) >= 0):
+                        self.negative = False
+                    else:
+                        self.negative = True
+                    whole = abs(int(s))
+                    parts = [0]
+                    self.n, self.d = as_n_d(whole, parts)
+                # Apparently not a whole number
+                except Exception as e:
+                    raise Exception('Cannot Sexagesimalize \'' + str(s) + '\'<br/><small>' + str(e) + "</small>")
 
-		return number_in_decimal
+        # Get Variables Directly
+        else:
+            self.n = kwargs['n']
+            self.d = kwargs['d']
+            self.unary = None
+            self.negative = False
 
-	def de_unarize(self):
-		a = self
-		if self.unary == 'crd':
-			result = 2 * math.sin(math.radians(self.as_decimal()/2))			
-			try: 
-				a = Sexagesimal(result)
-			except Exception as e:
-				l.e("There was an error: " + str(e))
-				raise Exception(str(e))
-		return a
+    def match(self, b):
+        places = b.d
+        if self.d < places:
+            change = places - self.d
+            self.n = self.n * (base ** change)
+            self.d += change
+        elif self.d > places:
+            b.match(self)
 
-	def has_unary(self):
-		if self.unary is not None:
-			return True
-		else:
-			return False
+    def __abs__(self):
+        a = copy.deepcopy(self)
+        a.negative = False
+        return a
 
-	def trim(self, places):
-		if (len(self.parts) > places):
-			self.parts = self.parts[0:places]
-		return self
+    def __cmp__(self, b):
 
-	def __str__(self):
-		s = ''
-		self.trim(max_places)
-		if (self.negative == False):
-			s += ''
-		elif (self.negative == True):
-			s += '-'
-
-		s  += str(self.whole) + ";"
-		places = len(self.parts)
-		for x in self.parts:
-			if (places > 1):
-				s += str(x) + ","
-			elif (places == 1):
-				s += str(x)
-			places -= 1
-
-		if self.unary == 'crd':
-			s = "crd(" + s + ")"
-		
-		return s
-
-	# TODO: Rewrite this function to rely on __str__ above
-	def to_html(self):
-		s = ''
-		self.trim(max_places)
-		if (self.negative == False):
-			s += ''
-		elif (self.negative == True):
-			s += '-'
-
-		s  += str(self.whole) + ";"
-		places = len(self.parts)
-		for x in self.parts:
-			if (places > 1):
-				s += str(x) + ","
-			elif (places == 1):
-				s += str(x)
-			places -= 1
-
-		if self.unary == 'crd':
-			s = "<small>crd</small>(" + s + ")"
-		# Returns a Markup Object
-		return Markup(s)
-
-	def __neg__(self):
-		a = Sexagesimal(str(self)) # TODO: Better way to copy?
-		if (self.negative == True):
-			a.negative = False
-		elif (self.negative == False):
-			a.negative = True
-		else:
-			a.negative = True
-		return a
-
-	def __abs__(self):
-		a = Sexagesimal(str(self)) # TODO: Better way to copy?
-		a.negative = False
-		return a	
-
-	def __add__(self, b):
-		a = self
-		
-		# Is this actually a subtraction problem?
-		if (a.negative == True and b.negative == True):
-			return -(abs(a) + abs(b))
-		elif (a.negative == True):
-			return b - abs(a)
-		elif (b.negative == True):
-			return abs(a) - abs(b)
-		else:
-			a = self
-			places = max(len(a.parts), len(b.parts))
-			y = '0'
-			for x in range(1, places): y += ',0' 
-			result = Sexagesimal('0;' + y)
-
-			c = 1; carry = 0
-			while (c <= places):
-				x = carry; carry = 0
-				if (len(a.parts) > places - c): x += a.parts[places-c]
-				if (len(b.parts) > places - c): x += b.parts[places-c]
-				if (x >= 60): carry, x = divmod(x, 60)
-				result.parts[places-c] = x
-				c += 1
-			result.whole = a.whole + b.whole + carry
-			return result
-
-	def __sub__(self, b):
-		a = self
-
-		if (a.negative == True and b.negative == True):
-			return abs(b)-abs(a)
-		elif (a.negative == True):
-			return - (abs(a) + abs(b))
-		elif (b.negative == True):
-			return abs(a) + abs(b)
-		elif (b.as_decimal() > a.as_decimal()):
-			return - (b - a)
-		else:
-			places = max(len(a.parts), len(b.parts))
-			# Create a Blank Result
-			result = Sexagesimal('0;0').pad(places)
-			print result
-			c = places - 1; carry = 0
-			while (c >= 0):
-				x = carry; carry = 0
-				if (len(a.parts) > c):
-					x += a.parts[c]
-						
-				if (len(b.parts) > c):
-					x -= b.parts[c]
-
-				if (x < 0):
-					x += 60
-					carry = -1
-
-				result.parts[c] = x
-				c -= 1
-
-			if (a.whole == b.whole and carry == -1):
-				result.whole = 0
-				result.negative = True
-			else:
-				result.whole = a.whole - b.whole + carry
-			return result
+        if isinstance(b, str):
+            return -1
+        a = copy.deepcopy(self)
+        a.match(b)
 
 
-	def pad(self, places):
-		# Adds extra zeroes as necessary
-		if len(self.parts) > places:
-			return self
-		else:
-			for x in range(places - len(self.parts)):
-				self.parts.append(0)
-			return self
 
-	def __mul__(self, b):
-		a = self
-		return Sexagesimal(a.as_decimal() * b.as_decimal())
+        if a.n > b.n:
+            return 1
+        elif a.n == b.n:
+            return 0
+        elif a.n < b.n:
+            return -1
 
-	def __div__(self, b):
-		a = self
-		return Sexagesimal(a.as_decimal() / b.as_decimal())
+    def __add__(self, b):
+        a = copy.deepcopy(self)
 
-	def __pow__(self, b):
-		a = self
-		return Sexagesimal(a.as_decimal() ** b.as_decimal())
+        # Is this actually a subtraction problem?
+        if (a.negative == True and b.negative == True):
+            return -(abs(a) + abs(b))
+        elif (a.negative == True):
+            return b - abs(a)
+        elif (b.negative == True):
+            return abs(a) - abs(b)
+        else:
+            a.match(b)
+            return Sexagesimal(n=(a.n + b.n), d=a.d)
 
-	def __cmp__(self, b):
-		a = self.as_decimal()
-		if type(b) != float and type(b) != int:
-			b = b.as_decimal()
+    def __mul__(self, b):
+        a = copy.deepcopy(self)
+        return Sexagesimal(n=(a.n * b.n), d=(a.d + b.d))
 
-		if a > b:    return 1
-		elif a == b: return 0
-		elif a < b:  return -1
+    def __div__(self, b):
+        a = copy.deepcopy(self)
+        a.match(b)
 
-	def __eq__(self, b):
-		if type(b) == unicode or type(b) == str:  return False
-		elif type(b) == float or type(b) == int:  return self.as_decimal() == b
-		elif self.as_decimal() == b.as_decimal(): return True
+        whole, remainder = divmod(a.n, b.n)
+        c = 0
+        parts = []
+        while True:
+            part, remainder = divmod(remainder * base, b.n)
+
+            parts.append(part)
+            c += 1
+            if remainder == 0 or c > 5:
+                break
+        n,d = as_n_d(whole, parts)
+        return Sexagesimal(n=n, d=d)
+
+    def __sub__(self, b):
+        a = copy.deepcopy(self)
+
+        if (a.negative == True and b.negative == True):
+            return abs(b) - abs(a)
+        elif (a.negative == True):
+            return - (abs(a) + abs(b))
+        elif (b.negative == True):
+            return abs(a) + abs(b)
+        elif (b > a):
+            return - (b - a)
+        else:
+            a.match(b)
+            return Sexagesimal(n=(a.n - b.n), d=a.d)
+
+    def __neg__(self):
+        a = copy.deepcopy(self)
+        if (self.negative == True):
+            a.negative = False
+        elif (self.negative == False):
+            a.negative = True
+        else:
+            a.negative = True
+        return a
+
+    def __str__(self):
+        s = ''
+        if self.negative == True:
+            s += '-'
+
+        w, p = as_w_p(self.n, self.d)
+
+        s += str(w) + ";"
+        places = len(p)
+        for x in p:
+            if (places > 1):
+                s += str(x) + ","
+            elif (places == 1):
+                s += str(x)
+            places -= 1
+
+        if self.unary == 'crd':
+            s = "crd(" + s + ")"
+        return s
+
+    def __float__(self):
+        return float(self.n) / (base ** self.d)
+
+    def to_html(self):
+        s = ''
+        whole, parts = as_w_p(self.n, self.d)
+
+        if (self.negative == False):
+                s += ''
+        elif (self.negative == True):
+                s += '-'
+
+        s += str(whole) + ";"
+        places = len(parts)
+        for x in parts:
+                if (places > 1):
+                        s += str(x) + ","
+                elif (places == 1):
+                        s += str(x)
+                places -= 1
+
+        if self.unary == 'crd':
+                s = "<small>crd</small>(" + s + ")"
+        # Returns a Markup Object
+        return Markup(s)
+
+    def has_unary(self):
+        if self.unary is not None:
+                return True
+        else:
+                return False
+
+    def trim(self,x):
+        # TODO: Write Trim Function
+        return self
