@@ -1,6 +1,7 @@
-import string, math, sys, re
+import string, re
 from flask import Markup
 import copy
+import math
 
 max_places = 90
 base = 60
@@ -9,24 +10,6 @@ from utils import Logger, Error
 
 l = Logger('sexa')
 
-
-def as_n_d(whole, parts):
-    n = base * whole
-    d = 1
-    for x in parts:
-        d += 1
-        n = (n + x) * base
-    return n, d
-
-def as_w_p(n, d):
-    w, r = divmod(n, base ** d)
-    c = d - 1
-    p = []
-    for x in range(c):
-        part, r = divmod(r, base ** c)
-        p.append(part)
-        c -= 1
-    return w, p
 
 class Expression:
     def __init__(self, pieces):
@@ -154,84 +137,102 @@ class Expression:
                     s += str(x)
         return s
 
+
 class Sexagesimal:
-    def __init__(self, s=None, **kwargs):
+    def __init__(self, s=None, unary=None, negative=False, **kwargs):
+        if 'n' in kwargs:
+            self.n = kwargs['n']
+            self.unary = unary
+            self.negative = negative
+            if 'd' in kwargs:
+                self.d = kwargs['d']
+            else:
+                # TODO Write Error function for 'n' but no 'd'
+                pass
+        # Create number from whole/parts
+        elif 'whole' in kwargs:
+            whole = kwargs['whole']
+            parts = kwargs['parts']
+            n = base * whole
+            d = 1
+            for x in parts:
+                d += 1
+                n = (n + x) * base
+            self.n = n
+            self.d = d
+            self.unary = unary
+            self.negative = negative
+
+        elif '.' in str(s):
+            i, r = divmod(float(s), 1)
+            whole = abs(int(i))
+
+            parts = []
+            while True:
+                i, r = divmod(r * base, 1)
+                parts.extend([int(i)])
+                # TODO: Rewrite this to better decide
+                #  when to exit loop.
+                if r * (base ** 3) < 0.01:
+                    break
+
+            self.__init__(whole=whole,
+                          parts=parts,
+                          unary=unary,
+                          negative=negative)
 
         # Parse from a String
-        if s is not None:
-            # Replace ~ with -
-            try:
-                # If you can, change any ~ to -.
-                s = re.sub(r'\~', '-', s)
-            except:
-                pass
-
-            # Parse Unary
-            if 'crd' in str(s):
-                self.unary = 'crd'
-                s = re.sub(r'[a-zA-Z]+', '', s)
-            else:
-                self.unary = None
-
-            if (';' in str(s)):
-                whole_and_frac = string.split(s, ";")
-                if ('-' not in str(whole_and_frac[0])):
-                    self.negative = False
-                else:
-                    self.negative = True
-
-                whole = abs(int(whole_and_frac[0]))
-                if (',' in str(whole_and_frac[1])):
-                    fracs = string.split(whole_and_frac[1], ",")
-                    y = 1
-                    parts = []
-                    for x in fracs:
-                        parts.extend([int(x)])
-                else:
-                    parts = [int(whole_and_frac[1])]
-                self.n, self.d = as_n_d(whole, parts)
-
-            elif ('.' in str(s)):
-                if (float(s) >= 0):
-                    self.negative = False
-                else:
-                    self.negative = True
-
-                i, r = divmod(float(s), 1)
-                whole = abs(int(i))
-
-                parts = []
-                x = 0
-                while True:
-                    i, r = divmod(r * base, 1)
-                    parts.extend([int(i)])
-                    # TODO: Rewrite this to better decide
-                    #  when to exist loop.
-                    if (r * (base ** 3) < 0.01):
-                        break
-                self.n, self.d = as_n_d(whole, parts)
-
-            # Is it a whole number, garbage?
-            else:
-                # Trying to see if it's a whole number
-                try:
-                    if (int(s) >= 0):
-                        self.negative = False
-                    else:
-                        self.negative = True
-                    whole = abs(int(s))
-                    parts = [0]
-                    self.n, self.d = as_n_d(whole, parts)
-                # Apparently not a whole number
-                except Exception as e:
-                    raise Exception('Cannot Sexagesimalize \'' + str(s) + '\'<br/><small>' + str(e) + "</small>")
-
-        # Get Variables Directly
         else:
-            self.n = kwargs['n']
-            self.d = kwargs['d']
-            self.unary = None
-            self.negative = False
+            self.parse_from_string(s)
+
+    def parse_from_string(self, s):
+        # Replace ~ with -
+        try:
+            # If you can, change any ~ to -.
+            s = re.sub(r'~', '-', str(s))
+        except Exception as e:
+            pass
+
+        if '-' in str(s):
+            negative = True
+        else:
+            negative = False
+        s = re.sub(r'\-', '', s)
+
+        # Parse Unary
+        unary = None
+        if 'crd' in str(s):
+            unary = 'crd'
+            s = re.sub(r'[a-zA-Z]+', '', s)
+
+        if ';' in str(s):
+            whole_and_frac = string.split(s, ';')
+            whole = int(whole_and_frac[0])
+            if ',' in str(whole_and_frac[1]):
+                fracs = string.split(whole_and_frac[1], ',')
+                parts = []
+                for x in fracs:
+                    parts.extend([int(x)])
+            else:
+                parts = [int(whole_and_frac[1])]
+
+            self.__init__(whole=whole,
+                          parts=parts,
+                          unary=unary,
+                          negative=negative)
+
+        # Is it a whole number or garbage?
+        else:
+            # Trying to see if it's a whole number
+            try:
+                self.__init__(whole=int(s),
+                              parts=[0],
+                              unary=unary,
+                              negative=negative)
+
+            #Apparently not a whole number
+            except Exception as e:
+                raise Exception('Cannot Sexagesimalize ' + str(s))
 
     def __abs__(self):
         a = copy.deepcopy(self)
@@ -245,8 +246,7 @@ class Sexagesimal:
         a = copy.deepcopy(self)
         a.match(b)
 
-
-
+        # TODO: Add support for negatives
         if a.n > b.n:
             return 1
         elif a.n == b.n:
@@ -269,12 +269,23 @@ class Sexagesimal:
             return Sexagesimal(n=(a.n + b.n), d=a.d)
 
     def __mul__(self, b):
-        a = copy.deepcopy(self)
-        return Sexagesimal(n=(a.n * b.n), d=(a.d + b.d))
+        negative = False
+        if self.negative and b.negative == False:
+            negative = True
+        elif b.negative and self.negative == False:
+            negative = True
+
+        return Sexagesimal(n=(self.n * b.n), d=(self.d + b.d), negative=negative)
 
     def __div__(self, b):
         a = copy.deepcopy(self)
         a.match(b)
+
+        negative = False
+        if a.negative and not b.negative:
+            negative = True
+        elif b.negative and not a.negative:
+            negative = True
 
         whole, remainder = divmod(a.n, b.n)
         c = 0
@@ -286,8 +297,7 @@ class Sexagesimal:
             c += 1
             if remainder == 0 or c > 5:
                 break
-        n,d = as_n_d(whole, parts)
-        return Sexagesimal(n=n, d=d)
+        return Sexagesimal(whole=whole, parts=parts, negative=negative)
 
     def __sub__(self, b):
         a = copy.deepcopy(self)
@@ -316,17 +326,18 @@ class Sexagesimal:
 
     def __str__(self):
         s = ''
-        if self.negative == True:
+        if self.negative:
             s += '-'
 
-        w, p = as_w_p(self.n, self.d)
+        w = self.whole
+        p = self.parts
 
         s += str(w) + ";"
         places = len(p)
         for x in p:
-            if (places > 1):
+            if places > 1:
                 s += str(x) + ","
-            elif (places == 1):
+            elif places == 1:
                 s += str(x)
             places -= 1
 
@@ -335,40 +346,40 @@ class Sexagesimal:
         return s
 
     def __float__(self):
-        return float(self.n) / (base ** self.d)
+        if self.unary is not None:
+            return float(self.evaluate_unary())
+        elif self.negative:
+            return float(self.n * -1) / (base ** self.d)
+        else:
+            return float(self.n) / (base ** self.d)
 
-    def to_html(self):
+
+    def to_html(self, trim=6):
         s = ''
-        whole, parts = as_w_p(self.n, self.d)
 
-        if (self.negative == False):
-                s += ''
-        elif (self.negative == True):
-                s += '-'
+        if self.negative:
+            s += '-'
 
-        s += str(whole) + ";"
-        places = len(parts)
-        for x in parts:
-                if (places > 1):
-                        s += str(x) + ","
-                elif (places == 1):
-                        s += str(x)
-                places -= 1
+        s += str(self.whole) + ";"
+        places = min(len(self.parts), trim)
+        for x in self.parts:
+            if places > 1:
+                s += str(x) + ","
+            elif places == 1:
+                s += str(x)
+            places -= 1
 
         if self.unary == 'crd':
-                s = "<small>crd</small>(" + s + ")"
-        # Returns a Markup Object
+            s = "<small>crd</small>(" + s + ")"
+            # Returns a Markup Object
         return Markup(s)
 
+    @property
     def has_unary(self):
         if self.unary is not None:
-                return True
+            return True
         else:
-                return False
-
-    def trim(self,x):
-        # TODO: Write Trim Function
-        return self
+            return False
 
     def match(self, b):
         places = b.d
@@ -379,20 +390,55 @@ class Sexagesimal:
         elif self.d > places:
             b.match(self)
 
+    def evaluate_unary(self):
+        if self.unary == 'crd':
+                self.unary = None
+
+                result = 2 * math.sin(math.radians(float(self)/2))
+                try:
+                    self.__init__(result)
+                except Exception as e:
+                    l.e("There was an error: " + str(e))
+                    raise Exception(str(e))
+        return self
+
     def __pow__(self, b):
-        # TODO: Write a specific method for whole number powers
-        return Sexagesimal(self.as_decimal() ** b.as_decimal())
+        a = copy.deepcopy(self)
+        original_a = copy.deepcopy(self)
+        if b.parts == [0]:
+            print 'b.whole:', b.whole
+            for x in range(b.whole - 1):
+                a *= original_a
+            return a
 
-    def as_decimal(self):
-        number_in_decimal, fracs = as_w_p(self.n, self.d)
-        y = 1
-        for x in fracs:
-                x = float(x)
-                denom = pow(60, y)
-                number_in_decimal += x/denom
-                y += 1
+        else:
+            print 'floaty',a,b,
+            return Sexagesimal(float(self) ** float(b))
 
-        if (self.negative):
-                number_in_decimal = number_in_decimal * -1
+    @property
+    def whole(self):
+        whole, r = divmod(self.n, base ** self.d)
+        return whole
 
-        return number_in_decimal
+    @property
+    def parts(self):
+        whole, r = divmod(self.n, base ** self.d)
+        c = self.d - 1
+        parts = []
+        for x in range(c):
+            part, r = divmod(r, base ** c)
+            parts.append(part)
+            c -= 1
+        return parts
+
+    def trim(self, places):
+        # TODO: Rewrite Calculator and Sexagesimal w/o trim()
+        return self
+
+a = Sexagesimal('-2;0')
+b = Sexagesimal('3;0')
+c = Sexagesimal('1;30')
+print a, b, c
+print a ** b
+
+# TODO: Work out a way to trim numbers at each point
