@@ -164,8 +164,12 @@ class Sexagesimal:
             self.negative = negative
 
         elif '.' in str(s):
-            i, r = divmod(float(s), 1)
-            whole = abs(int(i))
+            if float(s) < 0:
+                negative = True
+
+            s = abs(float(s))
+
+            whole, r = divmod(float(s), 1)
 
             parts = []
             while True:

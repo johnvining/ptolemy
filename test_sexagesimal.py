@@ -30,7 +30,6 @@ class TestSexagesimal(TestCase):
             [Sexagesimal('0;0,0,5'), Sexagesimal(whole=0, parts=[0,0,5]),
              'Multiple place __init__ fails with zeroes.'],
 
-            #TODO: Allow for blank places
             [Sexagesimal('0;,,5'), Sexagesimal(whole=0, parts=[0,0,5]),
             'Multiple place __init__ fails.'],
 
@@ -40,9 +39,8 @@ class TestSexagesimal(TestCase):
 
             [Sexagesimal('-0;15'), Sexagesimal('-0;15'), ''],
 
-            #TODO: Allow Sexagesimal numbers to be created from negative floats
-            #[Sexagesimal('-0;15'), Sexagesimal(-0.25), 'Fails on negative floats.'],
-            #[Sexagesimal('-0;15'), Sexagesimal('-0.25'), 'Fails on negative floats as strings.'],
+            [Sexagesimal('-0;15'), Sexagesimal(-0.25), 'Fails on negative floats.'],
+            [Sexagesimal('-0;15'), Sexagesimal('-0.25'), 'Fails on negative floats as strings.'],
 
             #TODO: Allow Sexagesimal numbers to be created from unary floats
             #[Sexagesimal('crd1.0'), Sexagesimal(whole=1, parts=[0], unary='crd'),
