@@ -212,7 +212,10 @@ class Sexagesimal:
                 fracs = string.split(whole_and_frac[1], ',')
                 parts = []
                 for x in fracs:
-                    parts.extend([int(x)])
+                    if x is '':
+                        parts.append(0)
+                    else:
+                        parts.append(int(x))
             else:
                 parts = [int(whole_and_frac[1])]
 
@@ -434,11 +437,3 @@ class Sexagesimal:
     def trim(self, places):
         # TODO: Rewrite Calculator and Sexagesimal w/o trim()
         return self
-
-a = Sexagesimal('-2;0')
-b = Sexagesimal('3;0')
-c = Sexagesimal('1;30')
-print a, b, c
-print a ** b
-
-# TODO: Work out a way to trim numbers at each point

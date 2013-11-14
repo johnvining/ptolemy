@@ -31,8 +31,8 @@ class TestSexagesimal(TestCase):
              'Multiple place __init__ fails with zeroes.'],
 
             #TODO: Allow for blank places
-            #[Sexagesimal('0;,,5'), Sexagesimal(whole=0, parts=[0,0,5]),
-            # 'Multiple place __init__ fails.'],
+            [Sexagesimal('0;,,5'), Sexagesimal(whole=0, parts=[0,0,5]),
+            'Multiple place __init__ fails.'],
 
             [Sexagesimal('123123123123123123123'),
              Sexagesimal(whole=123123123123123123123, parts=[0]),
@@ -60,61 +60,95 @@ class TestSexagesimal(TestCase):
             self.assertEqual(case[0], case[1], case[2])
 
     def test_to_html(self):
-        self.assertEqual(Sexagesimal('3;45').to_html(), Markup('3;45'))
-        self.assertEqual(Sexagesimal('crd3;45').to_html(), Markup('<small>crd</small>(3;45)'))
+        test_cases = [
+            [Sexagesimal('3;45').to_html(),
+             Markup('3;45'), ''],
+
+            [Sexagesimal('crd3;45').to_html(),
+             Markup('<small>crd</small>(3;45)'),
+             'Sexagesimal with unary to_html fails.'],
+
+            [Sexagesimal('-3;45').to_html(),
+             Markup('-3;45'),
+             'Negative Sexagesimal to_html fails.'],
+
+            [Sexagesimal(5).to_html(), Markup('5;0'), '']
+        ]
+
+        for case in test_cases:
+            self.assertEqual(case[0], case[1], case[2])
 
     def test_has_unary(self):
         self.assertTrue(Sexagesimal('crd3;12').has_unary)
         self.assertFalse(Sexagesimal('3;12').has_unary)
 
     def test_addition(self):
-        self.assertEqual(Sexagesimal('3;15') + Sexagesimal('2;20'),
-                        Sexagesimal('5;35'))
+        test_cases = [
+            [Sexagesimal('3;0') + Sexagesimal('2;0'),
+             Sexagesimal('5;0'), ''],
 
-        self.assertEqual(Sexagesimal('3;0') + Sexagesimal('2;0'),
-                        Sexagesimal('5;0'))
+            [Sexagesimal('3;15') + Sexagesimal('2;20'),
+             Sexagesimal('5;35'), ''],
 
-        self.assertEqual(Sexagesimal('3;15') + Sexagesimal('2;45'),
-                        Sexagesimal('6'))
+            [Sexagesimal('3;15') + Sexagesimal('2;45'),
+             Sexagesimal('6'), ''],
+
+            [Sexagesimal('0;30') + Sexagesimal('0;30'),
+             Sexagesimal('1'), ''],
+
+            [Sexagesimal('-0;30') + Sexagesimal('1'),
+             Sexagesimal('0;30'), ''],
+
+            [Sexagesimal('1;0') + Sexagesimal('-0;30'),
+             Sexagesimal('0;30'), ''],
+
+            [Sexagesimal('-1;30') + Sexagesimal('-3;15'),
+             Sexagesimal('-4;45'), '']
+        ]
+
+        for case in test_cases:
+            self.assertEqual(case[0], case[1], case[2])
 
     def test_multiplication(self):
-        self.assertEqual(Sexagesimal('1;0') * Sexagesimal('1;0'),
-                         Sexagesimal('1;0'),
-                         '1;0 * 1;0 =? 1;0')
+        test_cases = [
+            [Sexagesimal('1;0') * Sexagesimal('1;0'),
+             Sexagesimal('1;0'), ''],
 
-        self.assertEqual(Sexagesimal('-1;0') * Sexagesimal('1;0'),
-                         Sexagesimal('-1;0'),
-                         '-1;0 * 1;0 =? -1;0')
+            [Sexagesimal('-1;0') * Sexagesimal('1;0'),
+             Sexagesimal('1;0'), ''],
 
+            [Sexagesimal('1;0') * Sexagesimal('1;0'),
+             Sexagesimal('-1;0'), ''],
 
-        self.assertEqual(Sexagesimal('1;0') * Sexagesimal('2;0'),
-                         Sexagesimal('2;0'),
-                         '1;0 * 2;0 =? 2;0')
+            [Sexagesimal('-1;0') * Sexagesimal('-1;0'),
+             Sexagesimal('1;0'), ''],
 
-        self.assertEqual(Sexagesimal('-1;0') * Sexagesimal('-2;0'),
-                         Sexagesimal('2;0'))
+            [Sexagesimal('1;15') * Sexagesimal('2;0'),
+             Sexagesimal('2;30'), ''],
 
-        self.assertEqual(Sexagesimal('1;15') * Sexagesimal('2;0'),
-                         Sexagesimal('2;30'),
-                         '1;15 * 2;0 =? 2;30')
+            [Sexagesimal('2;0') * Sexagesimal('1;15'),
+             Sexagesimal('2;30'), ''],
+        ]
 
-        self.assertEqual(Sexagesimal('1;0') * Sexagesimal('1;0'),
-                         Sexagesimal('1;0'))
-
-        self.assertEqual(Sexagesimal('1;0') * Sexagesimal('1;0'),
-                         Sexagesimal('1;0'))
+        for case in test_cases:
+            self.assertEqual(case[0], case[1], case[2])
 
     def test_match(self):
-        a = Sexagesimal('1;2,3,2')
-        b = Sexagesimal('2;0')
-        a.match(b)
+        test_cases = [
+            ['1;2,3,2', '2;0', ''],
+            ['9999999', '0;0,0,0,0,0,1', 'Large integer and small Sexagesimal fails.']
+        ]
 
-        # Make sure that match has not actually changed the values
-        self.assertEqual(a, Sexagesimal('1;2,3,2'))
-        self.assertEqual(b, Sexagesimal('2;0'))
+        for case in test_cases:
+            a = Sexagesimal(case[0])
+            b = Sexagesimal(case[1])
+            a.match(b)
+
+            self.assertEqual(a, Sexagesimal(case[0]), case[2])
+            self.assertEqual(b, Sexagesimal(case[1]), case[2])
 
     def test_evaluate_unary(self):
-        #self.fail()
+        #Write test cases for evaluate unary
         pass
 
     def test_whole(self):
