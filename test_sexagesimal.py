@@ -31,10 +31,14 @@ class TestSexagesimal(TestCase):
              'Multiple place __init__ fails with zeroes.'],
 
             [Sexagesimal('0;,,5'), Sexagesimal(whole=0, parts=[0,0,5]),
-            'Multiple place __init__ fails.'],
+             'Multiple place __init__ fails.'],
 
             [Sexagesimal('123123123123123123123'),
              Sexagesimal(whole=123123123123123123123, parts=[0]),
+             'Large integer __init__ fails.'],
+
+            [Sexagesimal('-999999999;0,0,0,0,0,0,0,1'),
+             Sexagesimal(whole=999999999, parts=[0, 0, 0, 0, 0, 0, 0, 1], negative=True),
              'Large integer __init__ fails.'],
 
             [Sexagesimal('-0;15'), Sexagesimal('-0;15'), ''],
@@ -107,6 +111,30 @@ class TestSexagesimal(TestCase):
         for case in test_cases:
             self.assertEqual(case[0], case[1], case[2])
 
+    def test_subtraction(self):
+        test_cases = [
+            [Sexagesimal('3;0') - Sexagesimal('2;0'),
+             Sexagesimal('1;0'), ''],
+
+            [Sexagesimal('3;0') - Sexagesimal('2;15'),
+             Sexagesimal('0;45'), ''],
+
+            [Sexagesimal('3;0') - Sexagesimal('-2;0'),
+             Sexagesimal('5;0'), ''],
+
+            [Sexagesimal('-3;0') - Sexagesimal('2;0'),
+             Sexagesimal('-5;0'), ''],
+
+            [Sexagesimal('-3;0') - Sexagesimal('-2;0'),
+             Sexagesimal('-1;0'), ''],
+
+            [Sexagesimal('3;5,5,5,5') - Sexagesimal('0;5,0,5,0'),
+             Sexagesimal('3;0,5,0,5'), ''],
+        ]
+
+        for case in test_cases:
+            self.assertEqual(case[0], case[1], case[2])
+
     def test_multiplication(self):
         test_cases = [
             [Sexagesimal('1;0') * Sexagesimal('1;0'),
@@ -131,10 +159,32 @@ class TestSexagesimal(TestCase):
         for case in test_cases:
             self.assertEqual(case[0], case[1], case[2])
 
+    def test_division(self):
+        test_cases = [
+            [Sexagesimal('3;50') / Sexagesimal(2),
+             Sexagesimal('1;55'), ''],
+
+            [Sexagesimal(2) / Sexagesimal(2),
+            Sexagesimal(1), ''],
+
+            [Sexagesimal('1;30') / Sexagesimal('0;30'),
+            Sexagesimal('3;0'), ''],
+
+            [Sexagesimal('0;0') / Sexagesimal('2;0'),
+            Sexagesimal('0;0'), ''],
+
+            [Sexagesimal('1;0') / Sexagesimal('1;0'),
+            Sexagesimal('1;0'), ''],
+        ]
+
+        for case in test_cases:
+            self.assertEqual(case[0], case[1], case[2])
+
     def test_match(self):
         test_cases = [
             ['1;2,3,2', '2;0', ''],
-            ['9999999', '0;0,0,0,0,0,1', 'Large integer and small Sexagesimal fails.']
+            ['9999999999999999999', '0;0,0,0,0,0,1',
+             'Large integer and small Sexagesimal fails.']
         ]
 
         for case in test_cases:
