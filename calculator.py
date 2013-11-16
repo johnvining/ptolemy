@@ -4,22 +4,21 @@ from utils import Logger, Error
 l = Logger('calc')
 
 class Calculator:
-    def __init__(self, order_of_operations='PEMDAS', trim=6):
+    def __init__(self, order_of_operations='PEMDAS'):
         if order_of_operations == 'PEMDAS':
             self.order_of_operations = 'PEMDAS'
         elif order_of_operations == 'LEFT TO RIGHT':
             self.order_of_operations = 'LEFT TO RIGHT'
-        self.trim = trim
-        l.v('New Calculator: ' + self.order_of_operations + ", " + str(self.trim))
+        l.v('New Calculator: ' + self.order_of_operations)
 
     def evaluate_expression(self, expression):
         l.v('evaluate_expression: ' + str(expression))
-        steps = [];
-        errors = [];
+        steps = []
+        errors = []
         query_expression = expression.pieces
 
         # Check for expressions within the expression, evaluate those
-        query_expression_temp = [];
+        query_expression_temp = []
         c = 0
         for x in query_expression:
             if isinstance(x, Expression):
@@ -116,14 +115,14 @@ class Calculator:
     def evaluate(self, a, b, operator):
         l.v('evaluate')
         if operator == "*":
-            return (a * b).trim(self.trim)
-        elif (operator == "+"):
-            return (a + b).trim(self.trim)
-        elif (operator == ':'):
-            return (a / b).trim(self.trim)
-        elif (operator == '-'):
-            return (a - b).trim(self.trim)
-        elif (operator == '^'):
-            return (a ** b).trim(self.trim)
+            return a * b
+        elif operator == "+":
+            return a + b
+        elif operator == ':':
+            return a / b
+        elif operator == '-':
+            return a - b
+        elif operator == '^':
+            return a ** b
         else:
             raise Exception(str(operator) + ' is not a valid operator.')

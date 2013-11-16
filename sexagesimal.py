@@ -361,14 +361,14 @@ class Sexagesimal:
             return float(self.n) / (base ** self.d)
 
 
-    def to_html(self, trim=6):
+    def to_html(self, max_places=6):
         s = ''
 
         if self.negative:
             s += '-'
 
         s += str(self.whole) + ";"
-        places = min(len(self.parts), trim)
+        places = min(len(self.parts), max_places)
         for x in self.parts:
             if places > 1:
                 s += str(x) + ","
@@ -437,7 +437,3 @@ class Sexagesimal:
             parts.append(part)
             c -= 1
         return parts
-
-    def trim(self, places):
-        # TODO: Rewrite Calculator and Sexagesimal w/o trim()
-        return self
