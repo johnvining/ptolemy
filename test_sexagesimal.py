@@ -84,6 +84,16 @@ class TestSexagesimal(TestCase):
         for case in test_cases:
             self.assertEqual(case[0], case[1], case[2])
 
+    def test_clean_up(self):
+        test_cases = [
+            ['2;0,0', '2;0', ''],
+            ['2;2,2,2', '2;2,2,2', ''],
+        ]
+
+        for case in test_cases:
+            self.assertEqual(Sexagesimal(case[0]).clean_up(), Sexagesimal(case[1]), case[2])
+
+
     def test_has_unary(self):
         self.assertTrue(Sexagesimal('crd3;12').has_unary)
         self.assertFalse(Sexagesimal('3;12').has_unary)

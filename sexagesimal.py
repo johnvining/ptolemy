@@ -111,6 +111,7 @@ class Expression:
                 # a string.
                 html += '(' + str(x.to_html()) + ')'
             elif isinstance(x, Sexagesimal):
+
                 html += str(x.to_html())
             else:
                 html += str(x)
@@ -336,8 +337,12 @@ class Sexagesimal:
         if self.negative:
             s += '-'
 
+        self.clean_up()
         w = self.whole
         p = self.parts
+
+        if p == []:
+            p = [0]
 
         s += str(w) + ";"
         places = len(p)
@@ -364,17 +369,21 @@ class Sexagesimal:
     def to_html(self, max_places=6):
         s = ''
 
+        self.clean_up()
         if self.negative:
             s += '-'
 
         s += str(self.whole) + ";"
-        places = min(len(self.parts), max_places)
-        for x in self.parts:
-            if places > 1:
-                s += str(x) + ","
-            elif places == 1:
-                s += str(x)
-            places -= 1
+        if len(self.parts) == 0:
+            s += '0'
+        else:
+            places = min(len(self.parts), max_places)
+            for x in self.parts:
+                if places > 1:
+                    s += str(x) + ","
+                elif places == 1:
+                    s += str(x)
+                places -= 1
 
         if self.unary == 'crd':
             s = "<small>crd</small>(" + s + ")"
@@ -439,7 +448,7 @@ class Sexagesimal:
         return parts
 
     def clean_up(self):
-        while self.n % base == 0:
+        while (self.n/base) % base == 0 and self.d > 0:
             self.n /= base
             self.d -= 1
 
