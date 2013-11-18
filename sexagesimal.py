@@ -10,7 +10,6 @@ from utils import Logger, Error
 
 l = Logger('sexa')
 
-
 class Expression:
     def __init__(self, pieces):
         self.pieces = pieces
@@ -78,11 +77,9 @@ class Expression:
                     # Anything that cannot be sexagesimalized is considered
                     # an operator.
                     q.append(z)
-                    l.v('Could not sexagesimalize ' + str(z))
 
         if level != 0:
             errors.append(Error('Please close all parentheses!', None, None))
-            level = 0
 
         return cls(q), errors
 
@@ -91,19 +88,19 @@ class Expression:
         end_super = False
         for x in self.pieces:
             if isinstance(x, basestring):
-                if (x == '^'):
+                if x == '^':
                     html += '<sup>'
                     end_super = True
-                elif (end_super):
+                elif end_super:
                     html += str(x) + '</sup>'
                     end_super = False
-                elif (x == '+'):
+                elif x == '+':
                     html += ' <b>+</b> '
-                elif (x == '*'):
+                elif x == '*':
                     html += ' &times; '
-                elif (x == ':'):
+                elif x == ':':
                     html += ' <b>:</b> '
-                elif (x == '-'):
+                elif x == '-':
                     html += ' <b>&ndash;</b> '
             elif isinstance(x, Expression):
                 # Since the rest of `html` is a string and not a Markup
@@ -121,15 +118,15 @@ class Expression:
     def __str__(self):
         s = ''
         for x in self.pieces:
-            if (x == '^'):
+            if x == '^':
                 s += '^'
-            elif (x == '+'):
+            elif x == '+':
                 s += ' + '
-            elif (x == '*'):
+            elif x == '*':
                 s += ' * '
-            elif (x == ':'):
+            elif x == ':':
                 s += ' : '
-            elif (x == '-'):
+            elif x == '-':
                 s += ' - '
             else:
                 if isinstance(x, Expression):
@@ -148,8 +145,7 @@ class Sexagesimal:
             if 'd' in kwargs:
                 self.d = kwargs['d']
             else:
-                # TODO Write Error function for 'n' but no 'd'
-                pass
+                raise Exception('N without D.')
         # Create number from whole/parts
         elif 'whole' in kwargs:
             whole = kwargs['whole']
@@ -181,8 +177,7 @@ class Sexagesimal:
             while True:
                 i, r = divmod(r * base, 1)
                 parts.extend([int(i)])
-                # TODO: Rewrite this to better decide
-                #  when to exit loop.
+                # TODO: Rewrite this to better decide when to exit loop.
                 if r * (base ** 3) < 0.01:
                     break
 
@@ -431,9 +426,7 @@ class Sexagesimal:
             for x in range(b.whole - 1):
                 a *= original_a
             return a
-
         else:
-            print 'floaty',a,b,
             return Sexagesimal(float(self) ** float(b))
 
     @property
@@ -456,5 +449,4 @@ class Sexagesimal:
         while (self.n/base) % base == 0 and self.d > 0:
             self.n /= base
             self.d -= 1
-
         return self
