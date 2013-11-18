@@ -46,9 +46,11 @@ class TestSexagesimal(TestCase):
             [Sexagesimal('-0;15'), Sexagesimal(-0.25), 'Fails on negative floats.'],
             [Sexagesimal('-0;15'), Sexagesimal('-0.25'), 'Fails on negative floats as strings.'],
 
-            #TODO: Allow Sexagesimal numbers to be created from unary floats
-            #[Sexagesimal('crd1.0'), Sexagesimal(whole=1, parts=[0], unary='crd'),
-            # 'Unary assignment fails with floats.']
+            [Sexagesimal('crd1.0'), Sexagesimal(whole=1, parts=[0], unary='crd'),
+            'Unary assignment fails with floats.'],
+
+            [Sexagesimal('crd0.5'), Sexagesimal(whole=0, parts=[30], unary='crd'),
+            'Unary assignment fails with floats.'],
 
             [Sexagesimal('-0;15'), Sexagesimal(whole=0, parts=[15], negative=True), ''],
 

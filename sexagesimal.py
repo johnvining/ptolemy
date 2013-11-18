@@ -165,6 +165,11 @@ class Sexagesimal:
             self.negative = negative
 
         elif '.' in str(s):
+            unary = None
+            if 'crd' in str(s):
+                unary = 'crd'
+                s = re.sub(r'[a-zA-Z]+', '', s)
+
             if float(s) < 0:
                 negative = True
 
@@ -421,7 +426,7 @@ class Sexagesimal:
     def __pow__(self, b):
         a = copy.deepcopy(self)
         original_a = copy.deepcopy(self)
-        if b.parts == [0]:
+        if b.parts == [0] and b.negative == False:
             print 'b.whole:', b.whole
             for x in range(b.whole - 1):
                 a *= original_a
