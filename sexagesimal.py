@@ -277,9 +277,9 @@ class Sexagesimal:
 
     def __mul__(self, b):
         negative = False
-        if self.negative and b.negative == False:
+        if self.negative and b.negative is False:
             negative = True
-        elif b.negative and self.negative == False:
+        elif b.negative and self.negative is False:
             negative = True
 
         return Sexagesimal(n=(self.n * b.n), d=(self.d + b.d), negative=negative)
@@ -437,3 +437,10 @@ class Sexagesimal:
             parts.append(part)
             c -= 1
         return parts
+
+    def clean_up(self):
+        while self.n % base == 0:
+            self.n /= base
+            self.d -= 1
+
+        return self

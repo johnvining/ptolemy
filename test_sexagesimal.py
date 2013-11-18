@@ -74,7 +74,11 @@ class TestSexagesimal(TestCase):
              Markup('-3;45'),
              'Negative Sexagesimal to_html fails.'],
 
-            [Sexagesimal(5).to_html(), Markup('5;0'), '']
+            [Sexagesimal(5).to_html(), Markup('5;0'), ''],
+
+            [(Sexagesimal('1;0') * Sexagesimal('2;0,0,0,0')).to_html(),
+             Markup('2;0'), '']
+
         ]
 
         for case in test_cases:
