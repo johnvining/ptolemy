@@ -43,8 +43,8 @@ ga('send', 'pageview');
 		<div class="warning">
 			Multiplication and division calculations are
 			conducted by first converting the number to decimal, performing
-			the multiplcation and converting back. This is not completely
-			accurate. All numbers are trimed at six places.
+			the multiplication and converting back. This is not completely
+			accurate. All numbers are trimmed at six places.
 		</div>
 	{% endif %}
 
@@ -77,7 +77,9 @@ ga('send', 'pageview');
 					<!-- <div class="step">
 						<center><span class="expression">{{ result }}</span></center>
 					</div> -->
-				<form action="/" method="post" name="query"><input type="text" name="query" value="{{ result }}"></form>
+				<form action="/" method="post" name="query">
+                    <input type="text" name="query" value="{{ result }}">
+                </form>
 		</div>
 		
 
