@@ -33,7 +33,7 @@ def evaluate_query():
         for x in eval_errors:
             errors.append(x)
 
-        if errors == []:
+        if not errors:
             return render_template('pt.html', steps=steps, query=q_e_html, result=str(result), warning='')
         else:
             return render_template('pt.html', errors=errors, instructions=True)

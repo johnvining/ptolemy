@@ -3,6 +3,7 @@ from utils import Logger, Error
 
 l = Logger('calc')
 
+
 class Calculator:
     def __init__(self, order_of_operations='PEMDAS'):
         if order_of_operations == 'PEMDAS':
@@ -25,7 +26,8 @@ class Calculator:
             if isinstance(x, Expression):
                 result_from_parenthetical, steps_for_parenthetical, eval_errors = self.evaluate_expression(x)
                 result_from_parenthetical.is_new = True
-                for x in eval_errors: errors.append(x)
+                for y in eval_errors:
+                    errors.append(y)
                 beginning_string = Expression(query_expression_temp).to_html()
                 query_expression_temp.append(result_from_parenthetical)
                 end_string = Expression(query_expression[c + 1:]).to_html()
@@ -40,7 +42,7 @@ class Calculator:
         query_expression = query_expression_temp
 
         # And now, for Unary Operators
-        query_expression_temp = [];
+        query_expression_temp = []
         c = 0
         for x in query_expression:
             if isinstance(x, Sexagesimal) and x.has_unary:
@@ -60,11 +62,14 @@ class Calculator:
         cont = True
         while cont:
             try:
-                if (len(query_expression) == 1):
+                if len(query_expression) == 1:
                     # If the query is a single number
                     result = query_expression[0]
                     cont = False
-                elif (len(query_expression) == 3):
+                elif len(query_expression) == 2:
+                    errors.append(Error('Only two items in the expression.'))
+                    cont = False
+                elif len(query_expression) == 3:
                     # If the query has been solved down the last triplet, evaluate and set result
                     result = self.evaluate(query_expression[0], query_expression[2], query_expression[1])
                     cont = False
@@ -80,7 +85,7 @@ class Calculator:
                     sub_result = self.evaluate(query_expression[d], query_expression[d + 2], query_expression[d + 1])
                     sub_result.is_new = True
                     l.l('new sub result: ' + str(sub_result))
-                    query_expression.pop(d);
+                    query_expression.pop(d)
                     query_expression.pop(d + 1)
                     query_expression[d] = sub_result
                     try:
@@ -103,7 +108,7 @@ class Calculator:
             for operator in order:
                 c = 0
                 for x in triplets:
-                    if (x[1] == operator):
+                    if x[1] == operator:
                         return c
                     c += 1
             return 0

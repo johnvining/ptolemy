@@ -1,4 +1,5 @@
-import string, re
+import string
+import re
 from flask import Markup
 import copy
 import math
@@ -201,7 +202,7 @@ class Sexagesimal:
         try:
             # If you can, change any ~ to -.
             s = re.sub(r'~', '-', str(s))
-        except Exception as e:
+        finally:
             pass
 
         if '-' in str(s):
@@ -272,11 +273,11 @@ class Sexagesimal:
         a = copy.deepcopy(self)
 
         # Is this actually a subtraction problem?
-        if (a.negative == True and b.negative == True):
+        if a.negative and b.negative:
             return -(abs(a) + abs(b))
-        elif (a.negative == True):
+        elif a.negative:
             return b - abs(a)
-        elif (b.negative == True):
+        elif b.negative:
             return abs(a) - abs(b)
         else:
             a.match(b)
@@ -316,13 +317,13 @@ class Sexagesimal:
     def __sub__(self, b):
         a = copy.deepcopy(self)
 
-        if (a.negative == True and b.negative == True):
+        if a.negative and b.negative:
             return abs(b) - abs(a)
-        elif (a.negative == True):
+        elif a.negative:
             return - (abs(a) + abs(b))
-        elif (b.negative == True):
+        elif b.negative:
             return abs(a) + abs(b)
-        elif (b > a):
+        elif b > a:
             return - (b - a)
         else:
             a.match(b)
@@ -330,9 +331,9 @@ class Sexagesimal:
 
     def __neg__(self):
         a = copy.deepcopy(self)
-        if (self.negative == True):
+        if self.negative:
             a.negative = False
-        elif (self.negative == False):
+        elif not self.negative:
             a.negative = True
         else:
             a.negative = True
@@ -348,7 +349,7 @@ class Sexagesimal:
         w = self.whole
         p = self.parts
 
-        if p == []:
+        if not p:
             p = [0]
 
         s += str(w) + ";"
@@ -371,7 +372,6 @@ class Sexagesimal:
             return float(self.n * -1) / (base ** self.d)
         else:
             return float(self.n) / (base ** self.d)
-
 
     def to_html(self, max_places=6):
         s = ''
@@ -432,7 +432,7 @@ class Sexagesimal:
     def __pow__(self, b):
         a = copy.deepcopy(self)
         original_a = copy.deepcopy(self)
-        if b.parts == [0] and b.negative == False:
+        if b.parts == [0] and not b.negative:
             print 'b.whole:', b.whole
             for x in range(b.whole - 1):
                 a *= original_a
