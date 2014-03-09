@@ -11,6 +11,7 @@ from utils import Logger, Error
 
 l = Logger('sexa')
 
+
 class Expression:
     def __init__(self, pieces):
         self.pieces = pieces
@@ -117,7 +118,7 @@ class Expression:
                 html += str(x)
 
         if self.is_new:
-            html = '<i>' + html + '</i>'
+            html = '<span class="new_result">' + html + '</span>'
 
         return Markup(html)
 
@@ -397,7 +398,7 @@ class Sexagesimal:
             # Returns a Markup Object
 
         if self.is_new:
-            s = '<u>' + s + '</u>'
+            s = '<span class="new_result">' + s + '</span>'
 
         return Markup(s)
 

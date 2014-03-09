@@ -128,3 +128,7 @@ div.controls_header
 	margin-right: 15px;
 	font-family: "Consolas";
 	font-size: 12px;}
+
+.new_result {
+    text-decoration: underline;
+}

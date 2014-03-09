@@ -22,6 +22,7 @@ class Logger:
     def v(self, message):
         self.l(message, importance='verbose')
 
+
 class Error:
     def __init__(self, message, obj=None, python_error=None):
         self.message = message
