@@ -13,7 +13,8 @@ class Logger:
         elif importance == 'verbose':
             pass
         else:
-            print self.location + " :: " + message; sys.stdout.flush()
+            print self.location + " :: " + message
+            sys.stdout.flush()
 
     def e(self, message):
         self.l(message, importance='error')

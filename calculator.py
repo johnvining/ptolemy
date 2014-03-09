@@ -15,6 +15,7 @@ class Calculator:
         l.v('evaluate_expression: ' + str(expression))
         steps = []
         errors = []
+        result = None
         query_expression = expression.pieces
 
         # Check for expressions within the expression, evaluate those
@@ -23,6 +24,7 @@ class Calculator:
         for x in query_expression:
             if isinstance(x, Expression):
                 result_from_parenthetical, steps_for_parenthetical, eval_errors = self.evaluate_expression(x)
+                result_from_parenthetical.is_new = True
                 for x in eval_errors: errors.append(x)
                 beginning_string = Expression(query_expression_temp).to_html()
                 query_expression_temp.append(result_from_parenthetical)
@@ -70,14 +72,14 @@ class Calculator:
                     c = 0
                     triplets = []
                     length = len(query_expression) - 2
-                    while (c < length):
+                    while c < length:
                         triplets.extend([query_expression[c:c + 3]])
-                        c = c + 1
+                        c += 1
 
                     d = self.next_to_evaluate(triplets)
-
                     sub_result = self.evaluate(query_expression[d], query_expression[d + 2], query_expression[d + 1])
-
+                    sub_result.is_new = True
+                    l.l('new sub result: ' + str(sub_result))
                     query_expression.pop(d);
                     query_expression.pop(d + 1)
                     query_expression[d] = sub_result
@@ -92,11 +94,7 @@ class Calculator:
                 l.e('Problem with query. Py: ' + str(e))
                 cont = False
 
-        try:
-            return result, steps, errors
-        except:
-            # errors.append(Error('There was no result.'))
-            return None, steps, errors
+        return result, steps, errors
 
     def next_to_evaluate(self, triplets):
         l.v('next_to_evaluate')

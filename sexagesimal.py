@@ -14,6 +14,7 @@ class Expression:
     def __init__(self, pieces):
         self.pieces = pieces
         self.unary = None
+        self.is_new = False
 
     @classmethod
     def from_string(cls, query):
@@ -85,6 +86,7 @@ class Expression:
 
     def to_html(self):
         html = ''
+
         end_super = False
         for x in self.pieces:
             if isinstance(x, basestring):
@@ -113,6 +115,9 @@ class Expression:
             else:
                 html += str(x)
 
+        if self.is_new:
+            html = '<i>' + html + '</i>'
+
         return Markup(html)
 
     def __str__(self):
@@ -138,6 +143,7 @@ class Expression:
 
 class Sexagesimal:
     def __init__(self, s=None, unary=None, negative=False, **kwargs):
+        self.is_new = False
         if 'n' in kwargs:
             self.n = kwargs['n']
             self.unary = unary
@@ -334,6 +340,7 @@ class Sexagesimal:
 
     def __str__(self):
         s = ''
+
         if self.negative:
             s += '-'
 
@@ -388,6 +395,10 @@ class Sexagesimal:
         if self.unary == 'crd':
             s = "<small>crd</small>(" + s + ")"
             # Returns a Markup Object
+
+        if self.is_new:
+            s = '<u>' + s + '</u>'
+
         return Markup(s)
 
     @property

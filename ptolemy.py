@@ -23,7 +23,8 @@ def evaluate_query():
         calc = Calculator()
 
         query_expression, query_errors = Expression.from_string(request.form['query'])
-        for x in query_errors: errors.append(x)
+        for x in query_errors:
+            errors.append(x)
 
         q_e_html = query_expression.to_html()
 
