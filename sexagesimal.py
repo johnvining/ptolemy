@@ -119,6 +119,7 @@ class Expression:
 
         if self.is_new:
             html = '<span class="new_result">' + html + '</span>'
+            self.is_new = False
 
         return Markup(html)
 
@@ -399,6 +400,7 @@ class Sexagesimal:
 
         if self.is_new:
             s = '<span class="new_result">' + s + '</span>'
+            self.is_new = False
 
         return Markup(s)
 
