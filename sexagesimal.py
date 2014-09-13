@@ -164,8 +164,8 @@ class Sexagesimal:
             for x in parts:
                 d += 1
                 n = (n + x) * base
-            self.n = n
-            self.d = d
+            self.n = int(n)
+            self.d = int(d)
             self.unary = unary
             self.negative = negative
 
