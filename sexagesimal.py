@@ -96,7 +96,7 @@ class Expression:
                     html += '<sup>'
                     end_super = True
                 elif end_super:
-                    html += str(x) + '</sup>'
+                    html += '</sup>' + str(Expression(x))
                     end_super = False
                 elif x == '+':
                     html += ' <b>+</b> '
