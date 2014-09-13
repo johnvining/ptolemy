@@ -4,7 +4,7 @@ from sexagesimal import Expression
 from utils import Logger
 
 app = Flask(__name__)
-app.debug = True
+app.debug = False
 l = Logger('ptol')
 
 
@@ -34,6 +34,8 @@ def evaluate_query():
             errors.append(x)
 
         if not errors:
-            return render_template('pt.html', steps=steps, query=q_e_html, result=str(result), warning='')
+            return render_template('pt.html', steps=steps, query=q_e_html, result=str(result), warning='', decimal=float(result))
         else:
             return render_template('pt.html', errors=errors, instructions=True)
+
+app.run()
