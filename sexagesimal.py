@@ -32,7 +32,7 @@ class Expression:
                 Error('This query contains characters that are not letters, numbers or operators.', query, None))
 
         operators_as_strings = re.compile(r'[\*\+\-\:\^]')
-        q = '';
+        q = ''
         z_l = ''
         for z in query:
             # IF it's a minus sign AND
@@ -352,19 +352,20 @@ class Sexagesimal:
         p = self.parts
 
         if not p:
-            p = [0]
+            s = str(w)
+        else:
+            s += str(w) + ";"
+            places = len(p)
+            for x in p:
+                if places > 1:
+                    s += str(x) + ","
+                elif places == 1:
+                    s += str(x)
+                places -= 1
 
-        s += str(w) + ";"
-        places = len(p)
-        for x in p:
-            if places > 1:
-                s += str(x) + ","
-            elif places == 1:
-                s += str(x)
-            places -= 1
+            if self.unary == 'crd':
+                s = "crd(" + s + ")"
 
-        if self.unary == 'crd':
-            s = "crd(" + s + ")"
         return s
 
     def __float__(self):
@@ -382,10 +383,11 @@ class Sexagesimal:
         if self.negative:
             s += '-'
 
-        s += str(self.whole) + ";"
+
         if len(self.parts) == 0:
-            s += '0'
+            s = str(self.whole)
         else:
+            s += str(self.whole) + ";"
             places = min(len(self.parts), max_places)
             for x in self.parts:
                 if places > 1:
