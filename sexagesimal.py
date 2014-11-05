@@ -396,6 +396,11 @@ class Sexagesimal:
                     s += str(x)
                 places -= 1
 
+            # Delete any unnecessary zeroes at the end of the string, except for the last
+            while s[len(s)-2:len(s):1] == ",0":
+                s = s[0:len(s)-2:1]
+
+
         if self.unary == 'crd':
             s = "<small>crd</small>(" + s + ")"
             # Returns a Markup Object
