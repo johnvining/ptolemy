@@ -209,9 +209,9 @@ class Sexagesimal:
 
         if '-' in str(s):
             negative = True
+            s = re.sub(r'\-', '', s)
         else:
             negative = False
-        s = re.sub(r'\-', '', s)
 
         # Parse Unary
         unary = None
