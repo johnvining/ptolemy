@@ -385,7 +385,7 @@ class Sexagesimal:
 
 
         if len(self.parts) == 0:
-            s = str(self.whole)
+            s = str(self.whole) + ";0"
         else:
             s += str(self.whole) + ";"
             places = min(len(self.parts), max_places)
