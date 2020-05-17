@@ -362,8 +362,11 @@ class Sexagesimal:
                     s += str(x)
                 places -= 1
 
-            if self.unary == 'crd':
-                s = "crd(" + s + ")"
+        while s[len(s) - 2:len(s):1] == ",0":
+            s = s[0:len(s) - 2:1]
+
+        if self.unary == 'crd':
+            s = "crd(" + s + ")"
 
         return s
 
