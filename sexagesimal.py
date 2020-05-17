@@ -148,7 +148,7 @@ class Sexagesimal:
     def __init__(self, s=None, unary=None, negative=False, **kwargs):
         self.is_new = False
         if 'n' in kwargs:
-            self.n = kwargs['n']
+            self.n = int(kwargs['n'])
             self.unary = unary
             self.negative = negative
             if 'd' in kwargs:
@@ -157,7 +157,7 @@ class Sexagesimal:
                 raise Exception('N without D.')
         # Create number from whole/parts
         elif 'whole' in kwargs:
-            whole = kwargs['whole']
+            whole = int(kwargs['whole'])
             parts = kwargs['parts']
             n = base * whole
             d = 1
@@ -222,16 +222,16 @@ class Sexagesimal:
         if ';' in str(s):
             whole_and_frac = s.split(";")
             whole = int(whole_and_frac[0])
+            parts = []
             if ',' in str(whole_and_frac[1]):
                 fracs = string.split(whole_and_frac[1], ',')
-                parts = []
                 for x in fracs:
                     if x is '':
                         parts.append(0)
                     else:
                         parts.append(int(x))
             else:
-                parts = [int(whole_and_frac[1])]
+                parts.append(int(whole_and_frac[1]))
 
             self.__init__(whole=whole,
                           parts=parts,
@@ -347,7 +347,6 @@ class Sexagesimal:
         if self.negative:
             s += '-'
 
-        self.clean_up()
         w = self.whole
         p = self.parts
 
@@ -379,10 +378,8 @@ class Sexagesimal:
     def to_html(self, max_places=6):
         s = ''
 
-        self.clean_up()
         if self.negative:
             s += '-'
-
 
         if len(self.parts) == 0:
             s = str(self.whole) + ";0"
@@ -452,7 +449,7 @@ class Sexagesimal:
     @property
     def whole(self):
         whole, r = divmod(self.n, base ** self.d)
-        return whole
+        return int(whole)
 
     @property
     def parts(self):
@@ -464,9 +461,3 @@ class Sexagesimal:
             parts.append(part)
             c -= 1
         return parts
-
-    def clean_up(self):
-        while (self.n/base) % base == 0 and self.d > 0:
-            self.n /= base
-            self.d -= 1
-        return self
