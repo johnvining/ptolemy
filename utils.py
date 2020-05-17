@@ -8,13 +8,11 @@ class Logger:
 
     def l(self, message, importance='info'):
         if importance == 'error':
-            print self.location + " :ERROR: " + message;
-            sys.stdout.flush()
+            print(self.location + " :ERROR: " + message, flush=True)
         elif importance == 'verbose':
             pass
         else:
-            print self.location + " :: " + message
-            sys.stdout.flush()
+            print(self.location + " :: " + message, flush=True)
 
     def e(self, message):
         self.l(message, importance='error')

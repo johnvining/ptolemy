@@ -443,7 +443,6 @@ class Sexagesimal:
         a = copy.deepcopy(self)
         original_a = copy.deepcopy(self)
         if b.parts == [0] and not b.negative:
-            print 'b.whole:', b.whole
             for x in range(b.whole - 1):
                 a *= original_a
             return a
