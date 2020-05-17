@@ -91,7 +91,7 @@ class Expression:
 
         end_super = False
         for x in self.pieces:
-            if isinstance(x, basestring):
+            if isinstance(x, str):
                 if x == '^':
                     html += '<sup>'
                     end_super = True
@@ -220,7 +220,7 @@ class Sexagesimal:
             s = re.sub(r'[a-zA-Z]+', '', s)
 
         if ';' in str(s):
-            whole_and_frac = string.split(s, ';')
+            whole_and_frac = s.split(";")
             whole = int(whole_and_frac[0])
             if ',' in str(whole_and_frac[1]):
                 fracs = string.split(whole_and_frac[1], ',')
