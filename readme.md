@@ -16,3 +16,9 @@ The calculator takes a query like `3;0+2;30*4;45,45` and returns a value in sexa
 ### Requirements
 
 Ptolemy requires [Flask](http://flask.pocoo.org).
+
+### To run dev version
+
+- `source ptolemy-venv/bin/activate`
+- May need to install requirements from requirements.txt at this point.
+- `flask --app ptolemy run`
