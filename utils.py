@@ -1,5 +1,5 @@
 import sys
-from flask import Markup
+from markupsafe import Markup
 
 
 class Logger:

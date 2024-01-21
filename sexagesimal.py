@@ -1,6 +1,6 @@
 import string
 import re
-from flask import Markup
+from markupsafe import Markup
 import copy
 import math
 
