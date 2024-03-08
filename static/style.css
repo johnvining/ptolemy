@@ -10,6 +10,7 @@ div.page_title
 	padding: 15px;
 	margin: 15px;
 	border-bottom: 2px solid #3385FF;}
+
 div.footer
 	{color: #555D73;
 	font-size: 12px;
@@ -17,6 +18,14 @@ div.footer
 	width: 100%;
 	padding: 13px;
 	margin: 15px;
+	margin-top: 0px;
+	font-family: "Consolas"}
+
+div.decimal_footer
+	{font-size: 12px;
+	width: 100%;
+	padding: 13px 0px 13px 0px;
+	margin: 0px;
 	margin-top: 0px;
 	font-family: "Consolas"}
 
