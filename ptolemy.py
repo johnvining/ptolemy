@@ -37,6 +37,3 @@ def evaluate_query():
             return render_template('pt.html', steps=steps, query=q_e_html, result=str(result), warning='', decimal=float(result))
         else:
             return render_template('pt.html', errors=errors, instructions=True)
-
-if __name__ == "__main__":
-    app.run()
