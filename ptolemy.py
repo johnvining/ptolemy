@@ -15,7 +15,7 @@ def evaluate_query():
     if request.method == 'GET':
         l.l('request.method = GET')
         # If there is no query, display the basic page with instructions
-        return render_template('pt.html', instructions=True)
+        return render_template('index.html', instructions=True)
 
     elif request.method == 'POST':
         l.l('request.method = POST')
@@ -34,6 +34,6 @@ def evaluate_query():
             errors.append(x)
 
         if not errors:
-            return render_template('pt.html', steps=steps, query=q_e_html, result=str(result), warning='', decimal=float(result))
+            return render_template('index.html', steps=steps, query=q_e_html, result=str(result), warning='', decimal=float(result))
         else:
-            return render_template('pt.html', errors=errors, instructions=True)
+            return render_template('index.html', errors=errors, instructions=True)
