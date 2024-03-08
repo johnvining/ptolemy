@@ -52,8 +52,6 @@ ga('send', 'pageview');
 
 
 	<!-- RESULT -->
-	<!-- <div class="controls_header">Result</div> -->
-	
 		{% if result %}
 		<div class="controls_header">QUERY</div>
 		<div class="controls">
@@ -74,17 +72,12 @@ ga('send', 'pageview');
 
 		<div class="controls_header">RESULT &amp; NEW QUERY</div>
 		<div class="controls">
-					<!-- <div class="step">
-						<center><span class="expression">{{ result }}</span></center>
-					</div> -->
-				<form action="/" method="post" name="query">
-                    <input type="text" name="query" value="{{ result }}">
-                </form>
-                <div class="footer"><center>Decimal Notation: {{ decimal }}</center></div>
+			<form action="/" method="post" name="query">
+				<input type="text" name="query" value="{{ result }}">
+			</form>
+			<div class="footer"><center>Decimal Notation: {{ decimal }}</center></div>
 		</div>
 		
-
-
 		{% else %}
 			{% if error %}
 			<div class="controls_header">ENTER A NEW QUERY</div>
@@ -100,7 +93,7 @@ ga('send', 'pageview');
 	
 
 	<div class="footer">
-		<center><a href="https://github.com/johnvining/ptolemy/releases">v0.3</a> &middot; <a href="https://github.com/johnvining/ptolemy">Git Hub</a> &middot; <a href="mailto:john@jvining.com">Contact</a></center>
+		<center><a href="https://github.com/johnvining/ptolemy/releases">v0.3</a> &middot; <a href="https://github.com/johnvining/ptolemy">Git Hub</a> &middot; <a href="https://jvining.com/">Made by John Vining</a> &middot; <a href="mailto:john@jvining.com">Email</a></center>
 	</div>
 
 </div></center>
