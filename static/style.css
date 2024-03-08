@@ -55,6 +55,11 @@ span.expression {
 	font-family: "Consolas";
 }
 
+span.expression_explanation {
+	font-size: 14px;
+	font-family: "Consolas";
+}
+
 div.warning_header
 	{color: white;
 	font-size: 18;
