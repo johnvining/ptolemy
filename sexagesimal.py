@@ -224,7 +224,7 @@ class Sexagesimal:
             whole = int(whole_and_frac[0])
             parts = []
             if ',' in str(whole_and_frac[1]):
-                fracs = string.split(whole_and_frac[1], ',')
+                fracs = whole_and_frac[1].split(',')
                 for x in fracs:
                     if x == '':
                         parts.append(0)
