@@ -7,7 +7,6 @@ app = Flask(__name__)
 app.debug = False
 l = Logger('ptol')
 
-
 @app.route('/', methods=['GET', 'POST'])
 def evaluate_query():
     errors = []
@@ -37,3 +36,6 @@ def evaluate_query():
             return render_template('index.html', steps=steps, query=q_e_html, result=str(result), warning='', decimal=float(result))
         else:
             return render_template('index.html', errors=errors, instructions=True)
+
+if __name__ == '__main__':
+  app.run(port=5000)
