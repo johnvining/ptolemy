@@ -38,4 +38,5 @@ def evaluate_query():
         else:
             return render_template('pt.html', errors=errors, instructions=True)
 
-app.run()
+if __name__ == "__main__":
+    app.run()
