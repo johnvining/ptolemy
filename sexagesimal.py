@@ -447,14 +447,14 @@ class Sexagesimal:
 
     def evaluate_unary(self):
         if self.unary == 'crd':
-                self.unary = None
+            self.unary = None
 
-                result = 2 * math.sin(math.radians(float(self)/2))
-                try:
-                    self.__init__(result)
-                except Exception as e:
-                    l.e("There was an error: " + str(e))
-                    raise Exception(str(e))
+            result = 2 * math.sin(math.radians(float(self)/2))
+            try:
+                self.__init__(result)
+            except Exception as e:
+                l.e("There was an error: " + str(e))
+                raise Exception(str(e))
         return self
 
     def __pow__(self, b):

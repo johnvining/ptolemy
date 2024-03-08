@@ -46,7 +46,7 @@ class Calculator:
         c = 0
         for x in query_expression:
             if isinstance(x, Sexagesimal) and x.has_unary:
-                x_un_unarized = x.de_unarize()
+                x_un_unarized = x.evaluate_unary()
                 query_expression_temp.append(x_un_unarized)
                 beginning_string = Expression(query_expression_temp[:c]).to_html()
                 end_string = Expression(query_expression[c + 1:]).to_html()
