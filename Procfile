@@ -1,1 +1,1 @@
-web: gunicorn ptolemy:app
+web: gunicorn main:app
