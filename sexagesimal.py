@@ -294,7 +294,7 @@ class Sexagesimal:
 
         return Sexagesimal(n=(self.n * b.n), d=(self.d + b.d), negative=negative)
 
-    def __div__(self, b):
+    def __truediv__(self, b):
         a = copy.deepcopy(self)
         a.match(b)
 
