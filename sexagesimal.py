@@ -256,8 +256,7 @@ class Sexagesimal:
         a.negative = False
         return a
 
-    def __cmp__(self, b):
-
+    def compare(self, b):
         if isinstance(b, str):
             return -1
         a = copy.deepcopy(self)
@@ -270,6 +269,25 @@ class Sexagesimal:
             return 0
         elif a.n < b.n:
             return -1
+
+    def __eq__(self, b):
+        return self.compare(b) == 0
+        
+    def __ne__(self, b):
+        return self.compare(b) != 0
+        
+    def __lt__(self, b):
+        return self.compare(b) < 0
+        
+    def __le__(self, b):
+        return self.compare(b) <= 0
+        
+    def __gt__(self, b):
+        return self.compare(b) > 0
+        
+    def __ge__(self, b):
+        return self.compare(b) >= 0
+        
 
     def __add__(self, b):
         a = copy.deepcopy(self)
