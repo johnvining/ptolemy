@@ -5,7 +5,8 @@
       "Bash(curl -s -X POST http://localhost:5001/ --data-urlencode \"query=3;0+2;30\")",
       "Bash(curl -s -X POST http://localhost:5001/ --data-urlencode \"query=3;45*crd1;2,50\")",
       "Bash(curl -s -X POST http://localhost:5001/ --data-urlencode \"query=bogus\")",
-      "Bash(xargs kill:*)"
+      "Bash(xargs kill:*)",
+      "Bash(vercel --version)"
     ]
   }
 }
