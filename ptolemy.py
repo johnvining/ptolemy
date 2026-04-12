@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 from calculator import *
 from sexagesimal import Expression
-from utils import Logger
+from utils import Logger, Error
 
 app = Flask(__name__)
 app.debug = False
@@ -32,8 +32,13 @@ def evaluate_query():
         for x in eval_errors:
             errors.append(x)
 
+        try:
+            decimal = float(result)
+        except (ValueError, TypeError):
+            errors.append(Error('Could not evaluate expression.', result))
+
         if not errors:
-            return render_template('index.html', steps=steps, query=q_e_html, result=str(result), warning='', decimal=float(result))
+            return render_template('index.html', steps=steps, query=q_e_html, result=str(result), warning='', decimal=decimal)
         else:
             return render_template('index.html', errors=errors, instructions=True)
 
